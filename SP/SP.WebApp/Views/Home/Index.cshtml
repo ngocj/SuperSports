@@ -1,0 +1,507 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    var newProducts = ViewBag.NewProducts as IEnumerable<SP.Application.Dto.ProductDto.ProductViewDto> ?? new List<SP.Application.Dto.ProductDto.ProductViewDto>();
+    var bestSellingProducts = ViewBag.BestSellingProducts as IEnumerable<SP.Application.Dto.ProductDto.ProductViewDto> ?? new List<SP.Application.Dto.ProductDto.ProductViewDto>();
+}
+<section class="hero">
+    <div class="hero__slider owl-carousel">
+        <div class="hero__items set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anhtrangchu1.jpg")">
+            
+        </div>
+        <div class="hero__items set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anhtrangchu2.jpg")">
+            
+        </div>
+    </div>
+</section>
+
+<section class="product spad">
+        <div class="container">
+            <div class="section-title">
+                <h2 class="mt-5">Sản phẩm mới</h2>
+            </div>
+
+            <div class="products-grid">
+                @foreach (var item in newProducts)
+                {
+                if (!item.IsActive)
+                {
+                    continue;
+                }
+                    <div class="product-card">
+                        <div class="product-image">
+                            @if (item.ProductVariants != null && item.ProductVariants.FirstOrDefault()?.Images?.Any() == true)
+                            {
+                                var variant = item.ProductVariants.First();
+                                var imageFile = variant.Images.FirstOrDefault();
+                                var imageSrc = imageFile?.FileData != null
+                                ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                : "";
+                                var altText = imageFile?.FileData != null ? variant.ProductName : "Không có ảnh";
+
+                                <a asp-controller="Home" asp-action="Detail" asp-route-id="@item.Id" title="Xem chi tiết sản phẩm">
+                                    <img src="@imageSrc" alt="@altText" style="cursor:pointer;" />
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="no-image mb-1">Không có ảnh</div>
+                            }
+
+                            @if (item.Percent > 0 && item.IsDiscountActive == true)
+                            {
+                                <div class="discount-badge">
+                                    <span>-@item.Percent%</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="product-info">
+                            <h6 class="product-title">
+                                <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id" class="text-dark">
+                                    @item.ProductName
+                                </a>
+                            </h6>
+
+                            <div class="product-brand" style="opacity: 0.6;">
+                                <span>@item.BrandName</span>
+                            </div>
+
+                            <div class="product-price">
+                                @if (item.ProductVariants != null && item.ProductVariants.Any())
+                                {
+                                    var originalPrice = item.ProductVariants.First().Price;
+                                    var discountPercent = item.Percent;
+
+                                if (discountPercent > 0 && item.IsDiscountActive == true)
+                                {
+                                    var discountAmount = originalPrice * discountPercent / 100;
+                                    var finalPrice = originalPrice - discountAmount;
+                                    <span class="current-price red">@($"{finalPrice:N0}".Replace(",", ".")) ₫</span>
+                                    <span class="original-price"><s>@($"{originalPrice:N0}".Replace(",", ".")) ₫</s></span>
+                                }
+                                else
+                                {
+                                    <span class="current-price black">@($"{originalPrice:N0}".Replace(",", ".")) ₫</span>
+                                }
+                                }
+                                else
+                                {
+                                    <span class="current-price black">N/A</span>
+                                }
+                            </div>
+
+                        @if (item.ProductVariants != null && item.ProductVariants.Any() && item.ProductVariants.First().Rating != null)
+                        {
+                            <div class="product-rating">
+                                @{
+                                    var rating = item.ProductVariants.First().Rating ?? 0;
+                                }
+
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    if (i < Math.Floor(rating))
+                                    {
+                                        <i class="fas fa-star star"></i>
+                                    }
+                                    else if (i < rating)
+                                    {
+                                        <i class="fas fa-star-half-alt star"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-star star empty"></i>
+                                    }
+                                }
+
+                                <span>@rating.ToString("F1")</span>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="section-title">
+                <h2 class="mt-5">Sản phẩm bán chạy </h2>
+            </div>
+
+            <div class="products-grid">
+                @foreach (var item in bestSellingProducts)
+                {
+                if (!item.IsActive)
+                {
+                    continue;
+                }
+                    <div class="product-card">
+                        <div class="product-image">
+                            @if (item.ProductVariants != null && item.ProductVariants.FirstOrDefault()?.Images?.Any() == true)
+                            {
+                                var variant = item.ProductVariants.First();
+                                var imageFile = variant.Images.FirstOrDefault();
+                                var imageSrc = imageFile?.FileData != null
+                                ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                : "";
+                                var altText = imageFile?.FileData != null ? variant.ProductName : "Không có ảnh";
+
+                                <a asp-controller="Home" asp-action="Detail" asp-route-id="@item.Id" title="Xem chi tiết sản phẩm">
+                                    <img src="@imageSrc" alt="@altText" style="cursor:pointer;" />
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="no-image mb-1">Không có ảnh</div>
+                            }
+
+                        @if (item.Percent > 0 && item.IsDiscountActive == true)
+                            {
+                                <div class="discount-badge">
+                                    <span>-@item.Percent%</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="product-info">
+                            <h6 class="product-title">
+                                <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id" class="text-dark">
+                                    @item.ProductName
+                                </a>
+                            </h6>
+
+                            <div class="product-brand" style="opacity: 0.6;">
+                                <span>@item.BrandName</span>
+                            </div>
+
+                            <div class="product-price">
+                                @if (item.ProductVariants != null && item.ProductVariants.Any())
+                                {
+                                    var originalPrice = item.ProductVariants.First().Price;
+                                    var discountPercent = item.Percent;
+
+                                if (discountPercent > 0 && item.IsDiscountActive == true)
+                                {
+                                    var discountAmount = originalPrice * discountPercent / 100;
+                                    var finalPrice = originalPrice - discountAmount;
+                                    <span class="current-price red">@($"{finalPrice:N0}".Replace(",", ".")) ₫</span>
+                                    <span class="original-price"><s>@($"{originalPrice:N0}".Replace(",", ".")) ₫</s></span>
+                                }
+                                    else
+                                    {
+                                        <span class="current-price black">@($"{originalPrice:N0}".Replace(",", ".")) ₫</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="current-price black">N/A</span>
+                                }
+                            </div>
+
+                            @if (item.ProductVariants?.First().Rating != null)
+                            {
+                                <div class="product-rating">
+                                    @{
+                                    var rating = item.ProductVariants.First().Rating ?? 0;
+                                    }
+
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        if (i < Math.Floor(rating))
+                                        {
+                                            <i class="fas fa-star star"></i>
+                                        }
+                                        else if (i < rating)
+                                        {
+                                            <i class="fas fa-star-half-alt star"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-star star empty"></i>
+                                        }
+                                    }
+
+                                    <span>@rating.ToString("F1")</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+    </section>
+
+<section class="categories spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="categories__text">
+                    <h2>Sản phẩm nổi bật <br /> <span>Giày thể thao</span> <br /> Phụ kiện gym</h2>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="categories__hot__deal">
+                    <img src="~/SbHome/img/Anhsanpham/anh1.jpg" alt="Hot Deal Thể Thao"> <!-- ảnh mới -->
+                    <div class="hot__deal__sticker">
+                        <span>Giảm</span>
+                        <h5>299.000₫</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 offset-lg-1">
+                <div class="categories__deal__countdown">
+                    <span>Deal trong tuần</span>
+                    <h2>Giày chạy bộ Nike Air Zoom</h2>
+                    <div class="categories__deal__countdown__timer" id="countdown">
+                        <div class="cd-item">
+                            <span>3</span>
+                            <p>Ngày</p>
+                        </div>
+                        <div class="cd-item">
+                            <span>1</span>
+                            <p>Giờ</p>
+                        </div>
+                        <div class="cd-item">
+                            <span>50</span>
+                            <p>Phút</p>
+                        </div>
+                        <div class="cd-item">
+                            <span>18</span>
+                            <p>Giây</p>
+                        </div>
+                    </div>
+                    <a href="#" class="primary-btn">Mua ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="instagram spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="instagram__pic">
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh1.jpg")"></div>
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh2.jpg")"></div>
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh3.jpg")"></div>
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh7.jpg")"></div>
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh5.jpg")"></div>
+                    <div class="instagram__pic__item set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh6.jpg")"></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="instagram__text">
+                    <h2>Instagram</h2>
+                    <p>
+                        Theo dõi @@supersport để cập nhật những bộ sưu tập thể thao mới nhất: giày, quần áo, phụ kiện gym...
+                    </p>
+                    <h3>#SuperSportVN</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="latest spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <span>Tin tức mới</span>
+                    <h2>Xu hướng thể thao mới</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="blog__item">
+                    <div class="blog__item__pic set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh1.jpg")"></div>
+                    <div class="blog__item__text">
+                        <span><img src="~/SbHome/img/icon/calendar.png" alt=""> 10 May 2025</span>
+                        <h5>Top 5 mẫu giày chạy bộ 2025</h5>
+                        <a href="#">Đọc tiếp</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="blog__item">
+                    <div class="blog__item__pic set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh2.jpg")"></div>
+                    <div class="blog__item__text">
+                        <span><img src="~/SbHome/img/icon/calendar.png" alt=""> 12 May 2025</span>
+                        <h5>Luyện tập HIIT: Bí quyết đốt mỡ nhanh</h5>
+                        <a href="#">Đọc tiếp</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="blog__item">
+                    <div class="blog__item__pic set-bg" data-setbg="@Url.Content("~/SbHome/img/Anhsanpham/anh3.jpg")"></div>
+                    <div class="blog__item__text">
+                        <span><img src="~/SbHome/img/icon/calendar.png" alt=""> 15 May 2025</span>
+                        <h5>Phối đồ thể thao năng động & cá tính</h5>
+                        <a href="#">Đọc tiếp</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+   
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .hero__items {
+        width: 100%; /* full chiều rộng */
+        height: 500px; /* chiều cao nhỏ hơn, chỉnh theo ý bạn */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+        /* ===== PRODUCT GRID ===== */
+        .shop__product__option {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .product-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            padding: 15px;
+        }
+
+            .product-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                transition: transform 0.3s ease;
+            }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            line-height: 1.4;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-brand {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .star {
+            color: #ffd700;
+            font-size: 12px;
+        }
+
+            .star.empty {
+                color: #ddd;
+            }
+
+        .product-rating span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .current-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ff4757;
+        }
+
+        .original-price {
+            font-size: 13px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        /* Thêm vào phần CSS */
+        .brand-item.active a,
+        .brand-item.active {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+
+        /* Đảm bảo các phần tử active có style rõ ràng */
+        .shop__sidebar__categories li.active a,
+        .shop__sidebar__price li.active a {
+            background-color: #f0f8ff;
+            border-left: 3px solid #007bff;
+            padding-left: 9px; /* Giảm padding để bù cho border */
+        }
+
+
+</style>

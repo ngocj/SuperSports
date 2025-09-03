@@ -1,0 +1,497 @@
+﻿@model SP.WebApp.Controllers.AdminController.ProductStatsViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển sản phẩm";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --danger-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+        --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 20px;
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header-section {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--card-shadow);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        animation: float 8s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    .dashboard-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .export-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        transition: var(--transition);
+        backdrop-filter: blur(15px);
+        position: relative;
+        z-index: 2;
+        font-weight: 600;
+    }
+
+    .export-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        color: white;
+    }
+
+    .card-modern {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;s
+        transition: var(--transition);     
+    }
+
+    .card-modern:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 3px solid transparent;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .card-header-modern.primary {
+        border-bottom: 3px solid #667eea;
+    }
+
+    .card-header-modern.success {
+        border-bottom: 3px solid #11998e;
+    }
+
+    .card-header-modern.danger {
+        border-bottom: 3px solid #fc466b;
+    }
+
+    .card-title {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        color: #2d3748;
+    }
+
+    .chart-container {
+        padding: 2.5rem;
+        min-height: 350px;
+    }
+
+    .table-modern {
+        margin: 0;
+        font-size: 0.95rem;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .table-modern thead {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .table-modern th {
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+
+    .table-modern td {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        vertical-align: middle;
+    }
+
+    .table-modern tbody tr {
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .revenue-amount {
+        font-weight: 800;
+        color: #11998e;
+        font-size: 1.1rem;
+    }
+
+    .stock-quantity {
+        font-weight: 700;
+        padding: 0.6rem 1.2rem;
+        border-radius: 25px;
+        background: red;
+        color: white;
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+
+    .product-id {
+        font-family: 'Monaco', 'Menlo', monospace;
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 700;
+        color: #4a5568;
+    }
+
+    .color-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: var(--primary-gradient);
+        color: white;
+        text-transform: capitalize;
+    }
+
+    .size-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: rgba(102, 126, 234, 0.1);
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        color: #667eea;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .icon-primary { color: #667eea; }
+    .icon-success { color: #11998e; }
+    .icon-danger { color: #fc466b; }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 15px;
+        box-shadow: var(--card-shadow);
+        padding: 0.5rem;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .dropdown-item {
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-weight: 500;
+    }
+
+    .dropdown-item:hover {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateX(8px);
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-container { padding: 1rem; }
+        .dashboard-title { font-size: 2.2rem; }
+        .stats-grid { 
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .header-section { padding: 2rem; }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="dashboard-title">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Bảng Điều Khiển Phân Tích Sản Phẩm
+                </h1>
+                <p class="dashboard-subtitle">Thống kê và phân tích chi tiết về hiệu suất sản phẩm</p>
+            </div>
+         
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="stats-grid">
+        <div class="card-modern">
+            <div class="card-header-modern primary">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-bar icon-primary"></i>
+                    Phân Bổ Sản Phẩm Theo Danh Mục
+                </h6>
+            </div>
+            <div class="chart-container">
+                <canvas id="productsByCategoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card-modern">
+            <div class="card-header-modern primary">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-pie icon-primary"></i>
+                    Phân Bổ Sản Phẩm Theo Thương Hiệu
+                </h6>
+            </div>
+            <div class="chart-container">
+                <canvas id="productsByBrandChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Revenue Products -->
+    <div class="card-modern mb-4">
+        <div class="card-header-modern success">
+            <h6 class="card-title">
+                <i class="fas fa-trophy icon-success"></i>
+                Sản Phẩm Doanh Thu Cao Nhất
+            </h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Mã Sản Phẩm</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Kích Cỡ</th>
+                        <th>Màu Sắc</th>
+                        <th>Doanh Thu (VNĐ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model.TopRevenueProducts)
+                    {
+                        <tr>
+                            <td><span class="product-id">@product.ProductId</span></td>
+                            <td><strong>@product.ProductName</strong></td>
+                            <td><span class="size-badge">@product.Size</span></td>
+                            <td><span class="color-badge">@TranslateColor(product.Color)</span></td>
+                            <td><span class="revenue-amount">@product.TotalRevenue.ToString("N0")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="card-modern">
+        <div class="card-header-modern danger">
+            <h6 class="card-title">
+                <i class="fas fa-exclamation-triangle icon-danger"></i>
+                Sản Phẩm Sắp Hết Hàng (Dưới 10 sản phẩm)
+            </h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Mã Sản Phẩm</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Kích Cỡ</th>
+                        <th>Màu Sắc</th>
+                        <th>Số Lượng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model.LowStockProducts)
+                    {
+                        <tr>
+                            <td><span class="product-id">@product.ProductId</span></td>
+                            <td><strong>@product.ProductName</strong></td>
+                            <td><span class="size-badge">@product.Size</span></td>
+                            <td><span class="color-badge">@TranslateColor(product.Color)</span></td>
+                            <td><span class="stock-quantity">@product.StockQuantity</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/vendor/chart.js/Chart.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Biểu đồ theo danh mục với style mới
+            var categoryCtx = document.getElementById('productsByCategoryChart').getContext('2d');
+            var categoryChart = new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ProductsByCategory.Select(x => x.CategoryName))),
+                    datasets: [{
+                        label: 'Số lượng sản phẩm',
+                        data: @Html.Raw(Json.Serialize(Model.ProductsByCategory.Select(x => x.ProductCount))),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                color: '#64748b'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Biểu đồ theo thương hiệu với style mới
+            var brandCtx = document.getElementById('productsByBrandChart').getContext('2d');
+            var brandChart = new Chart(brandCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ProductsByBrand.Select(x => x.BrandName))),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(Model.ProductsByBrand.Select(x => x.ProductCount))),
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(17, 153, 142, 0.8)',
+                            'rgba(252, 70, 107, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
+                            'rgba(111, 66, 193, 0.8)'
+                        ],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverBorderWidth: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    @functions {
+        string TranslateColor(string color)
+        {
+            switch (color?.ToLower())
+            {
+                case "red": return "Đỏ";
+                case "blue": return "Xanh dương";
+                case "black": return "Đen";
+                case "white": return "Trắng";
+                case "green": return "Xanh lá";
+                case "yellow": return "Vàng";
+                case "purple": return "Tím";
+                case "gray": return "Xám";
+                case "orange": return "Cam";
+                case "pink": return "Hồng";
+                default: return color ?? "";
+            }
+        }
+    }
+}

@@ -1,0 +1,572 @@
+﻿@model IEnumerable<SP.Infrastructure.Repositories.Implement.EmployeeRepository.EmployeeStatsDto>
+@{
+    ViewData["Title"] = "Thống kê nhân viên";
+    Layout = "~/Views/Shared/_LayoutManager.cshtml";
+}
+
+<div class="container">
+    <h2 class="mb-4 text-dark font-weight-bold">@ViewData["Title"]</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+
+    <!-- Bảng dữ liệu -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold">Danh sách thống kê chi tiết</h6>
+        </div>
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th class="py-3">Mã nhân viên</th>
+                            <th class="py-3">Tên nhân viên</th>
+                            <th class="py-3 text-center">Số đơn đã xử lý</th>
+                            <th class="py-3 text-center">Tổng doanh thu</th>
+                            <th class="py-3 text-center">Số khách hàng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.EmployeeId</td>
+                                <td>@item.EmployeeName</td>
+                                <td class="text-center">@item.HandledOrderCount</td>
+                                <td class="text-center">@item.TotalRevenue.ToString("N0") ₫</td>
+                                <td class="text-center">@item.CustomerCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+     <!-- Biểu đồ 1: Số đơn đã xử lý -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h6 class="m-0 font-weight-bold">Biểu đồ số đơn hàng đã xử lý</h6>
+        </div>
+        <div class="card-body">
+            <canvas id="ordersChart" ></canvas>
+        </div>
+    </div>
+
+    <!-- Biểu đồ 2: Tỷ lệ doanh thu -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h6 class="m-0 font-weight-bold">Biểu đồ tỷ lệ doanh thu</h6>
+        </div>
+        <div class="card-body">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Lấy dữ liệu từ Model
+            var employees = @Html.Raw(Json.Serialize(Model));
+
+            // Chuẩn bị dữ liệu cho biểu đồ
+            var labels = employees.map(e => e.employeeName);
+            var orderData = employees.map(e => e.handledOrderCount);
+            var revenueData = employees.map(e => e.totalRevenue);
+
+            // Màu sắc cho biểu đồ
+            var backgroundColors = [
+                'rgba(78, 115, 223, 0.8)',
+                'rgba(54, 185, 204, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(199, 199, 199, 0.8)'
+            ];
+
+            // Biểu đồ 1: Số đơn đã xử lý (Bar Chart)
+            var ordersCtx = document.getElementById('ordersChart').getContext('2d');
+            var ordersChart = new Chart(ordersCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Số đơn đã xử lý',
+                        data: orderData,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.parsed.y + ' đơn';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value + ' đơn';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Biểu đồ 2: Tỷ lệ doanh thu (Pie Chart)
+            var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            var revenueChart = new Chart(revenueCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: revenueData,
+                        backgroundColor: backgroundColors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    var label = context.label || '';
+                                    var value = context.raw || 0;
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value.toLocaleString()} ₫ (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    /* === Variables CSS === */
+    :root {
+        --primary-color: #667eea;
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-color: #f093fb;
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-color: #4facfe;
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-color: #ffecd2;
+        --danger-color: #ff6b6b;
+        --text-dark: #2c3e50;
+        --text-light: #6c757d;
+        --bg-light: #f8f9ff;
+        --shadow-light: 0 2px 10px rgba(102, 126, 234, 0.1);
+        --shadow-medium: 0 8px 25px rgba(102, 126, 234, 0.15);
+        --shadow-heavy: 0 15px 35px rgba(102, 126, 234, 0.2);
+        --border-radius: 15px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* === General Styles === */
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 15px;
+    }
+
+    /* === Typography === */
+    h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 2rem;
+        position: relative;
+        text-align: center;
+    }
+
+    h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+
+    /* === Cards === */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+    }
+
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .card-header {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 1.75rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+
+    .card-header h6 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-header h6::before {
+        content: '📊';
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    .card-body {
+        padding: 2.5rem;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* === Table Styles === */
+    .table-responsive {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+    }
+
+    .table {
+        margin-bottom: 0;
+        background: white;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+         background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); 
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        padding: 1.5rem 1rem;
+        border: none;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .table tbody tr {
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: scale(1.01);
+    }
+
+    .table tbody tr:hover td {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* === Chart Cards === */
+    .card:nth-child(3) .card-header {
+        background: var(--success-gradient);
+    }
+
+    .card:nth-child(3) .card-header h6::before {
+        content: '📈';
+    }
+
+    .card:nth-child(4) .card-header {
+        background: var(--secondary-gradient);
+    }
+
+    .card:nth-child(4) .card-header h6::before {
+        content: '🥧';
+    }
+
+    /* === Alerts === */
+    .alert {
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1.75rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(75, 192, 192, 0.1) 0%, rgba(75, 192, 192, 0.05) 100%);
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary-gradient);
+    }
+
+    .alert .close {
+        font-size: 1.25rem;
+        font-weight: 300;
+        color: inherit;
+        opacity: 0.7;
+        transition: var(--transition);
+    }
+
+    .alert .close:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* === Chart Container === */
+    canvas {
+        border-radius: 8px;
+        transition: var(--transition);
+        max-height: 300px !important;
+        height: 300px !important;
+    }
+
+    canvas:hover {
+        transform: scale(1.02);
+    }
+
+    /* Chart specific sizing */
+    #ordersChart {
+        height: 250px !important;
+        max-height: 250px !important;
+    }
+
+    #revenueChart {
+        height: 250px !important;
+        max-height: 250px !important;
+    }
+
+    /* === Responsive Design === */
+    @@media (max-width: 1200px) {
+        .container {
+            max-width: 100%;
+            padding: 1.5rem 15px;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .card-header h6 {
+            font-size: 1.2rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .table thead th {
+            font-size: 0.75rem;
+            padding: 1rem 0.75rem;
+        }
+
+        .table tbody td {
+            font-size: 0.85rem;
+            padding: 1rem 0.75rem;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smaller charts on mobile */
+        canvas {
+            max-height: 200px !important;
+            height: 200px !important;
+        }
+
+        #ordersChart,
+        #revenueChart {
+            height: 200px !important;
+            max-height: 200px !important;
+        }
+
+        /* Stack charts vertically on mobile */
+        .card {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            padding: 1rem 10px;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+
+
+
+    /* === Loading States === */
+    .card.loading {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* === Page Load Animation === */
+    .card:nth-child(1) { animation: fadeInUp 0.6s ease-out 0.1s both; }
+    .card:nth-child(2) { animation: fadeInUp 0.6s ease-out 0.2s both; }
+    .card:nth-child(3) { animation: fadeInUp 0.6s ease-out 0.3s both; }
+    .card:nth-child(4) { animation: fadeInUp 0.6s ease-out 0.4s both; }
+
+    /* === Scrollbar Styling === */
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f3f4;
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-gradient);
+    }
+
+  
+</style>

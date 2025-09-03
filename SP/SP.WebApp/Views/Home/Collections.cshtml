@@ -1,0 +1,780 @@
+﻿@model IEnumerable<SP.Application.Dto.ProductDto.ProductViewDto>
+@{
+    ViewData["Title"] = "Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="shop spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="shop__sidebar">
+                    <div class="shop__sidebar__search">
+                        <form method="get" asp-action="Collections">
+                            @{
+                                var categoryId2 = Context.Request.Query["categoryId"];
+                                var brandId2 = Context.Request.Query["brandId"];
+                                var subCategoryId2 = Context.Request.Query["subCategoryId"];
+                                var sort2 = Context.Request.Query["sort"];
+                                var priceFrom2 = Context.Request.Query["priceFrom"];
+                                var priceTo2 = Context.Request.Query["priceTo"];
+                            }
+
+                            <input type="hidden" name="categoryId" value="@categoryId2" />
+                            <input type="hidden" name="brandId" value="@brandId2" />
+                            <input type="hidden" name="subCategoryId" value="@subCategoryId2" />
+                            <input type="hidden" name="sort" value="@sort2" />
+                            <input type="hidden" name="priceFrom" value="@priceFrom2" />
+                            <input type="hidden" name="priceTo" value="@priceTo2" />
+
+                            <input type="text" name="search" placeholder="Tìm sản phẩm..." class="form-control" value="@Context.Request.Query["search"]" />
+                            <button type="submit" class="btn btn-primary mt-4">
+                                <span class="icon_search"></span>
+                            </button>
+
+                        </form>
+                    </div>
+                    <div class="shop__sidebar__accordion">
+                        <div class="accordion" id="accordionExample">
+                            <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseOne">Loại sản phẩm</a>
+                                </div>
+                                <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__categories">
+                                            <ul class="nice-scroll">
+                                                @{
+                                                    var subCategories = ViewBag.SubCategories as List<SP.Application.Dto.CategoryDto.SubCategoryViewDto>;
+                                                    var currentBrandId = Context.Request.Query["brandId"];
+                                                    var currentSubId = Context.Request.Query["subCategoryId"].ToString();
+                                                    var priceFrom = Context.Request.Query["priceFrom"].ToString();
+                                                    var priceTo = Context.Request.Query["priceTo"].ToString();
+                                                    var search = Context.Request.Query["search"].ToString();
+                                                    
+                                                }
+
+                                                 <li class="brand-item @(string.IsNullOrEmpty(currentSubId) ? "active" : "")">
+                                                    <a class="d-block text-dark"")"
+                                                       href="@Url.Action("Collections", "Home", new {
+                categoryId = ViewBag.CategoryId,
+                sort = ViewBag.Sort,
+                subCategoryId = (int?)null,
+                brandId = currentBrandId,
+                priceFrom = string.IsNullOrEmpty(priceFrom) ? (decimal?)null : Convert.ToDecimal(priceFrom),
+                priceTo = string.IsNullOrEmpty(priceTo) ? (decimal?)null : Convert.ToDecimal(priceTo),
+                search = string.IsNullOrEmpty(search) ? null : search
+
+           })">
+                                                        Tất cả 
+                                                    </a>
+                                                </li>
+
+                                                @if (subCategories != null)
+                                                {
+                                                    foreach (var subcategory in subCategories)
+                                                    {
+                                                      <li class="brand-item @(currentSubId == subcategory.Id.ToString() ? "active" : "")">
+                                                            <a class="d-block text-dark"
+                                                               href="@Url.Action("Collections", "Home", new {
+                        categoryId = ViewBag.CategoryId,
+                        sort = ViewBag.Sort,
+                        subCategoryId = subcategory.Id,
+                        brandId = currentBrandId,
+                        priceFrom = string.IsNullOrEmpty(priceFrom) ? (decimal?)null : Convert.ToDecimal(priceFrom),
+                        priceTo = string.IsNullOrEmpty(priceTo) ? (decimal?)null : Convert.ToDecimal(priceTo),
+                        search = string.IsNullOrEmpty(search) ? null : search
+                   })">
+                                                                @subcategory.Name
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseTwo">Thương hiệu </a>
+                                </div>
+                                <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__categories">
+                                            <ul class="nice-scroll">
+                                                @{
+                                                    var brands = ViewBag.Brands as SelectList;
+                                                    var currentBrandId1 = Context.Request.Query["brandId"].ToString();
+                                                    var priceFrom1 = Context.Request.Query["priceFrom"].ToString();
+                                                    var priceTo1 = Context.Request.Query["priceTo"].ToString();
+                                                    var search1 = Context.Request.Query["search"].ToString();
+                                                }
+
+                                                <!-- Mục Tất cả (không chọn brand nào) -->
+                                                <li class="brand-item @(string.IsNullOrEmpty(currentBrandId1) ? "active" : "")">
+                                                    <a class="d-block text-dark"
+                                                       href="@Url.Action("Collections", "Home", new {
+               categoryId = ViewBag.CategoryId,
+               brandId = (int?)null,
+               sort = ViewBag.Sort,
+               subCategoryId = ViewBag.SubCategoryId,
+               priceFrom = string.IsNullOrEmpty(priceFrom1) ? (decimal?)null : Convert.ToDecimal(priceFrom1),
+               priceTo = string.IsNullOrEmpty(priceTo1) ? (decimal?)null : Convert.ToDecimal(priceTo1),
+               search = string.IsNullOrEmpty(search) ? null : search
+           })">
+                                                        Tất cả
+                                                    </a>
+                                                </li>
+
+                                                <!-- Các brand cụ thể -->
+                                                @if (brands != null)
+                                                {
+                                                    foreach (var brand in brands)
+                                                    {
+                                                        <li class="brand-item @(currentBrandId1 == brand.Value ? "active" : "")">
+                                                            <a class="d-block text-dark"
+                                                               href="@Url.Action("Collections", "Home", new {
+                       categoryId = ViewBag.CategoryId,
+                       brandId = brand.Value,
+                       sort = ViewBag.Sort,
+                       subCategoryId = ViewBag.SubCategoryId,
+                       priceFrom = string.IsNullOrEmpty(priceFrom1) ? (decimal?)null : Convert.ToDecimal(priceFrom1),
+                       priceTo = string.IsNullOrEmpty(priceTo1) ? (decimal?)null : Convert.ToDecimal(priceTo1),
+                       search = string.IsNullOrEmpty(search) ? null : search
+                   })">
+                                                                @brand.Text
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-heading">
+                                    <a data-toggle="collapse" data-target="#collapseThree">Giá </a>
+                                </div>
+                                <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <div class="shop__sidebar__price">
+                                            @{
+                                                var priceRanges = new List<(decimal? from, decimal? to, string label)>
+                                            {
+                                            (null, 1000000, "Dưới 1.000.000₫"),
+                                            (1000000, 2000000, "1.000.000₫ - 2.000.000₫"),
+                                            (2000000, 3000000, "2.000.000₫ - 3.000.000₫"),
+                                            (3000000, 5000000, "3.000.000₫ - 5.000.000₫"),
+                                            (5000000, null, "Trên 5.000.000₫")
+                                            };
+
+                                                var currentPriceFrom = Context.Request.Query["priceFrom"].ToString();
+                                                var currentPriceTo = Context.Request.Query["priceTo"].ToString();
+                                                var search2 = Context.Request.Query["search"].ToString();
+                                            }
+
+                                            <ul>
+                                                <li class="brand-item @((string.IsNullOrEmpty(currentPriceFrom) && string.IsNullOrEmpty(currentPriceTo)) ? "active" : "")">
+                                                    <a class="text-dark d-block" href="@Url.Action("Collections", "Home", new {
+                priceFrom = (decimal?)null,
+                priceTo = (decimal?)null,
+                categoryId = ViewBag.CategoryId,
+                brandId = ViewBag.BrandId,
+                subCategoryId = ViewBag.SubCategoryId,
+                sort = ViewBag.Sort,
+                search = string.IsNullOrEmpty(search2) ? null : search2
+            })">
+                                                        Tất cả
+                                                    </a>
+                                                </li>
+                                                <!-- Trong phần Price filter -->
+    @foreach (var range in priceRanges)
+{
+    bool IsMatch(string current, decimal? value) =>
+        string.IsNullOrEmpty(current) ? value == null : current == value?.ToString();
+
+    var isActive = IsMatch(currentPriceFrom, range.from) && IsMatch(currentPriceTo, range.to);
+
+    <li class="brand-item @(isActive ? "active" : "")">
+        <a class="text-dark d-block" href="@Url.Action("Collections", "Home", new {
+            priceFrom = range.from,
+            priceTo = range.to,
+            categoryId = ViewBag.CategoryId,
+            brandId = ViewBag.BrandId,
+            subCategoryId = ViewBag.SubCategoryId,
+            sort = ViewBag.Sort
+        })">
+            @range.label
+        </a>
+    </li>
+}                                                                                           
+                                            </ul>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>                           
+                                                     
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="shop__product__option">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__product__option__left mt-3">
+                                <p>
+                                    @if (Model != null)
+                                    {
+                                        <span class="text-dark">Có @Model.Count() sản phẩm</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-dark">Không có sản phẩm nào</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__product__option__right mt-3">
+    <form method="get" asp-action="Collections">
+    @{
+        var sort = Context.Request.Query["sort"].ToString();
+        var categoryId = Context.Request.Query["categoryId"].ToString();
+        var subCategoryId = Context.Request.Query["subCategoryId"].ToString();
+        var brandId = Context.Request.Query["brandId"].ToString();
+        var priceFrom3 = Context.Request.Query["priceFrom"].ToString();
+        var priceTo3 = Context.Request.Query["priceTo"].ToString();
+        var search3 = Context.Request.Query["search"].ToString();
+
+    }
+
+    <p>
+        <span class="text-dark">Sắp xếp theo </span>
+    </p>
+
+    <input type="hidden" name="categoryId" value="@categoryId" />
+    <input type="hidden" name="subCategoryId" value="@subCategoryId" />
+    <input type="hidden" name="brandId" value="@brandId" />
+    <input type="hidden" name="priceFrom" value="@priceFrom3" />
+    <input type="hidden" name="priceTo" value="@priceTo3" />
+    <input type="hidden" name="search" value="@search3" />
+
+    <select name="sort" class="form-control" onchange="this.form.submit()">
+        <option value="lastest" selected="@(sort == "lastest")">Mới nhất</option>
+        <option value="best_selling" selected="@(sort == "best_selling")">Bán chạy nhất</option>       
+        <option value="price_desc" selected="@(sort == "price_desc")">Giá giảm dần</option>
+        <option value="price_asc" selected="@(sort == "price_asc")">Giá tăng dần</option>
+    </select>
+</form>
+                            
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="products-grid">
+                    @foreach (var item in Model)
+                    {
+                        if (!item.IsActive) 
+                        {
+                            continue; 
+                        }
+                        <div class="product-card">
+                            <div class="product-image">
+                                @if (item.ProductVariants != null && item.ProductVariants.FirstOrDefault()?.Images?.Any() == true)
+                                {
+                                    var variant = item.ProductVariants.First();
+                                    var imageFile = variant.Images.FirstOrDefault();
+                                    var imageSrc = imageFile?.FileData != null
+                                    ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                    : "";
+                                    var altText = imageFile?.FileData != null ? variant.ProductName : "Không có ảnh";
+
+                                    <a asp-controller="Home" asp-action="Detail" asp-route-id="@item.Id" title="Xem chi tiết sản phẩm">
+                                        <img src="@imageSrc" alt="@altText" style="cursor:pointer;" />
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="no-image mb-1">Không có ảnh</div>
+                                }
+                                @if (item.Percent > 0 && item.IsDiscountActive == true)
+                                {
+                                    <div class="discount-badge">
+                                        <span>-@item.Percent%</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="product-info">
+                                <h6 class="product-title">
+                                    <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id" class="text-dark">
+                                        @item.ProductName
+                                    </a>
+                                </h6>
+
+                                <div class="product-brand" style="opacity: 0.6;">
+                                    <span>@item.BrandName</span>
+                                </div>
+                                <div class="product-price">
+                                    @if (item.ProductVariants != null && item.ProductVariants.Any())
+                                    {
+                                        var originalPrice = item.ProductVariants.First().Price;
+                                        var discountPercent = item.Percent;
+
+                                        if (discountPercent > 0)
+                                        {
+                                            var discountAmount = originalPrice * discountPercent / 100;
+                                            var finalPrice = originalPrice - discountAmount;
+                                            <span class="current-price red">
+                                                @($"{finalPrice:N0}".Replace(",", ".")) ₫
+                                            </span>
+                                            <span class="original-price">
+                                                @($"{originalPrice:N0}".Replace(",", ".")) ₫
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price black">
+                                                @($"{originalPrice:N0}".Replace(",", ".")) ₫
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="current-price black">N/A</span>
+                                    }
+                                </div>
+                                @if (item.ProductVariants != null && item.ProductVariants.Any() && item.ProductVariants.First().Rating != null)
+                                {
+                                    <div class="product-rating">
+                                        @{
+                                            var rating = item.ProductVariants.First().Rating ?? 0;
+                                        }
+
+                                        @for (int i = 0; i < 5; i++)
+                                        {
+                                            if (i < Math.Floor(rating))
+                                            {
+                                                <i class="fas fa-star star"></i>
+                                            }
+                                            else if (i < rating)
+                                            {
+                                                <i class="fas fa-star-half-alt star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-star star empty"></i>
+                                            }
+                                        }
+
+                                        <span>@rating.ToString("F1")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>            
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+@section Style
+{
+    <style>
+        /* ===== TYPOGRAPHY & BASE STYLES ===== */
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .shop {
+            padding: 40px 0;
+        }
+
+        /* ===== LAYOUT STRUCTURE ===== */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .col-lg-3 {
+            flex: 0 0 25%;
+            max-width: 25%;
+            padding: 0 15px;
+        }
+
+        .col-lg-9 {
+            flex: 0 0 75%;
+            max-width: 75%;
+            padding: 0 15px;
+        }
+
+        /* ===== SIDEBAR STYLES ===== */
+        .shop__sidebar {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 20px;
+        }
+
+        .shop__sidebar__search {
+            margin-bottom: 20px;
+        }
+
+            .shop__sidebar__search input {
+                width: 100%;
+                padding: 10px 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+            }
+
+            .shop__sidebar__search button {
+                background: none;
+                border: none;
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #666;
+            }
+
+        .card {
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-heading {
+            background: #f8f9fa;
+            padding: 12px 15px;
+        }
+
+            .card-heading a {
+                color: #333;
+                font-weight: 600;
+                display: block;
+                text-decoration: none;
+            }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        /* ===== FILTER STYLES ===== */
+        .shop__sidebar__categories ul,
+        .shop__sidebar__brand ul,
+        .shop__sidebar__price ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .current-price.red {
+            color: red;
+        }
+
+        .current-price.black {
+            color: black;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: black;
+        }
+
+
+        .shop__sidebar__categories li,
+        .shop__sidebar__brand li,
+        .shop__sidebar__price li {
+            margin-bottom: 8px;
+        }
+
+        .shop__sidebar__categories a,
+        .shop__sidebar__brand a,
+        .shop__sidebar__price a {
+            display: block;
+            padding: 8px 12px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+            .shop__sidebar__categories a:hover,
+            .shop__sidebar__brand a:hover,
+            .shop__sidebar__price a:hover {
+                background: #f0f2f5;
+                color: #333;
+            }
+
+        .shop__sidebar__size {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+            .shop__sidebar__size label {
+                display: inline-block;
+                padding: 6px 12px;
+                background: #f8f9fa;
+                border-radius: 4px;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+                .shop__sidebar__size label:hover {
+                    background: #e9ecef;
+                }
+
+        .shop__sidebar__color {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+
+            .shop__sidebar__color label:hover {
+                transform: scale(1.1);
+            }
+
+        .shop__sidebar__tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+            .shop__sidebar__tags a {
+                display: inline-block;
+                padding: 6px 12px;
+                background: #f8f9fa;
+                border-radius: 4px;
+                font-size: 13px;
+                color: #555;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+                .shop__sidebar__tags a:hover {
+                    background: #e9ecef;
+                    color: #333;
+                }
+
+        /* ===== PRODUCT GRID ===== */
+        .shop__product__option {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .product-image {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            padding: 15px;
+        }
+
+            .product-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                transition: transform 0.3s ease;
+            }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            line-height: 1.4;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-brand {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .star {
+            color: #ffd700;
+            font-size: 12px;
+        }
+
+            .star.empty {
+                color: #ddd;
+            }
+
+        .product-rating span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .current-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ff4757;
+        }
+
+        .original-price {
+            font-size: 13px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        /* Thêm vào phần CSS */
+        .brand-item.active a,
+        .brand-item.active {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+
+        /* Đảm bảo các phần tử active có style rõ ràng */
+        .shop__sidebar__categories li.active a,
+        .shop__sidebar__price li.active a {
+            background-color: #f0f8ff;
+            border-left: 3px solid #007bff;
+            padding-left: 9px; /* Giảm padding để bù cho border */
+        }
+
+        .shop__sidebar__categories ul,
+        .shop__sidebar__brand ul {
+            max-height: 300px; /* Giới hạn chiều cao của danh sách */
+            overflow-y: auto; /* Bật thanh cuộn dọc khi nội dung vượt quá chiều cao */
+        }
+
+            /* Tùy chỉnh thanh cuộn (tùy chọn) để đẹp hơn */
+            .shop__sidebar__categories ul::-webkit-scrollbar,
+            .shop__sidebar__brand ul::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .shop__sidebar__categories ul::-webkit-scrollbar-thumb,
+            .shop__sidebar__brand ul::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
+
+            .shop__sidebar__categories ul::-webkit-scrollbar-track,
+            .shop__sidebar__brand ul::-webkit-scrollbar-track {
+                background: #f8f9fa;
+            }
+
+    </style>
+
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        // Lấy dữ liệu JSON từ ViewBag
+        const allCategories = @Html.Raw(ViewBag.CategoriesJson);
+        const allSubCategories = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SubCategories));
+
+        const $categoryDropdown = $('#categoryDropdown');
+        const $subDropdown = $('#subCategoryDropdown');
+
+        allCategories.forEach(cat => {
+            $categoryDropdown.append(`<option value="${cat.Id}">${cat.CategoryName}</option>`);
+        });
+
+        $categoryDropdown.on('change', function () {
+            const categoryId = $(this).val();
+
+            $subDropdown.empty();
+            $subDropdown.append(`<option value="">-- Chọn Danh Mục Con --</option>`);
+
+            if (categoryId) {
+                const filtered = allSubCategories.filter(sc => sc.CategoryId == categoryId);
+                filtered.forEach(sc => {
+                    $subDropdown.append(`<option value="${sc.Id}">${sc.Name}</option>`);
+                });
+            }
+        });
+    </script>
+}
+
+
+

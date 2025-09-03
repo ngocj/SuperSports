@@ -1,0 +1,122 @@
+﻿@model SP.Application.Dto.ProductDto.ProductCreateDto
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tạo sản phẩm mới</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="fw-bold">Thông Tin Cơ Bản</h6>
+                                <hr>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ProductName" class="form-label">Tên Sản Phẩm</label>
+                                <input asp-for="ProductName" class="form-control" required />
+                                <span asp-validation-for="ProductName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="BrandId" class="form-label">Thương Hiệu</label>
+                                <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands" required>
+                                    <option value="">-- Chọn Thương Hiệu --</option>
+                                </select>
+                                <span asp-validation-for="BrandId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label">Danh Mục cha</label>
+                                <select asp-for="CategoryId" class="form-control" id="categoryDropdown" required>
+                                    <option value="">-- Chọn Danh Mục cha --</option>
+                                    <!-- JS sẽ append options -->
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="SubCategoryId" class="form-label">Danh Mục Con</label>
+                                <select asp-for="SubCategoryId" class="form-control" id="subCategoryDropdown" required>
+                                    <option value="">-- Chọn Danh Mục Con --</option>
+                                </select>
+                                <span asp-validation-for="SubCategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DiscountId" class="form-label">Giảm Giá</label>
+                                <select asp-for="DiscountId" class="form-control" asp-items="ViewBag.Discounts">
+                                    <option value="">-- Không Giảm Giá --</option>
+                                </select>
+                                <span asp-validation-for="DiscountId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Description" class="form-label">Mô Tả</label>
+                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="IsActive" class="form-check-label">Đang Kích Hoạt</label>
+                                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <a asp-action="GetAllProduct" asp-controller="Admin" class="btn btn-secondary me-2">Quay lại danh sách</a>
+                                <button type="submit" class="btn btn-primary mx-2">Tiếp tục</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        // Lấy dữ liệu JSON từ ViewBag
+        const allCategories = @Html.Raw(ViewBag.CategoriesJson);
+        const allSubCategories = @Html.Raw(ViewBag.SubCategoriesJson);
+
+        const $categoryDropdown = $('#categoryDropdown');
+        const $subDropdown = $('#subCategoryDropdown');
+
+        allCategories.forEach(cat => {
+            $categoryDropdown.append(`<option value="${cat.Id}">${cat.CategoryName}</option>`);
+        });
+
+        $categoryDropdown.on('change', function () {
+            const categoryId = $(this).val();
+
+            $subDropdown.empty();
+            $subDropdown.append(`<option value="">-- Chọn Danh Mục Con --</option>`);
+
+            if (categoryId) {
+                const filtered = allSubCategories.filter(sc => sc.CategoryId == categoryId);
+                filtered.forEach(sc => {
+                    $subDropdown.append(`<option value="${sc.Id}">${sc.Name}</option>`);
+                });
+            }
+        });
+    </script>
+}
+
+
+

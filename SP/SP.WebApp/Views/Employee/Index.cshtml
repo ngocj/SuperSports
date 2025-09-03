@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Thống kê doanh số nhân viên";
+    Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+}
+<div id="content">
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+        </button>
+
+        <form class="form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search d-none d-sm-inline-block">
+            <div class="input-group">
+                <input type="text" class="form-control bg-light border-0 small" placeholder="Tìm kiếm..."
+                       aria-label="Search" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search fa-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown no-arrow mx-1">
+                <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw"></i>
+                    <span class="badge badge-danger badge-counter">3+</span>
+                </a>
+                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                     aria-labelledby="alertsDropdown">
+                    <h6 class="dropdown-header">Thông báo</h6>
+                    <a class="dropdown-item d-flex align-items-center" href="#">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-primary">
+                                <i class="fas fa-file-alt text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="small text-gray-500">Hôm nay</div>
+                            <span class="font-weight-bold">Bạn có thông báo mới</span>
+                        </div>
+                    </a>
+                </div>
+            </li>
+
+            <div class="topbar-divider d-none d-sm-block"></div>
+
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">Employee</span>
+                    <img class="img-profile rounded-circle" src="img/undraw_profile.svg" />
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 text-gray-800">Thống kê doanh số</h1>
+            <a href="#" class="btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-download fa-sm text-white-50"></i> Tải báo cáo
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row">
+            <!-- Đơn hàng xử lý -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Đơn hàng xử lý thành công
+                            </div>
+                            <div class="h4 font-weight-bold text-gray-800" id="handledOrderCount">--</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-check-circle fa-3x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doanh thu -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng doanh thu đơn hàng 
+                            </div>
+                            <div class="h4 font-weight-bold text-gray-800" id="revenue">--</div>
+                        </div>                     
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khách hàng đã phục vụ -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Khách hàng đã phục vụ
+                            </div>
+                            <div class="h4 font-weight-bold text-gray-800" id="customerCount">--</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-3x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thêm bảng danh sách đơn hàng (nếu cần) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng đã xử lý thành công</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="ordersTable" class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Phương thức</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dữ liệu sẽ load từ ajax -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load thống kê chung
+            $.ajax({
+                url: '/Employee/GetEmployeeStats',
+                method: 'GET',
+                success: function (response) {
+                    $('#handledOrderCount').text(response.handledOrderCount);
+                    $('#revenue').text(new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(response.revenue));
+                    $('#customerCount').text(response.customersHandled ? response.customersHandled.length : 0);
+                },
+                error: function () {
+                    alert('Lỗi khi tải thống kê.');
+                }
+            });
+
+            // Load danh sách đơn hàng đã xử lý
+            $.ajax({
+                url: '/Employee/GetHandledOrders',
+                method: 'GET',
+                success: function (orders) {
+                    const tbody = $('#ordersTable tbody');
+                    tbody.empty();
+                    
+                    if (!orders || orders.length === 0) {
+                        tbody.append('<tr><td colspan="6" class="text-center">Không có đơn hàng nào</td></tr>');
+                        return;
+                    }
+
+                    const paymentMethodMap = {
+                        0: 'Tiền mặt',
+                        1: 'VnPay',
+                    };
+
+                
+
+                    orders.forEach(order => {
+                        const formattedDate = new Date(order.orderDate).toLocaleDateString('vi-VN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        tbody.append(`
+                            <tr>
+                                <td>${order.orderId}</td>
+                                <td>${order.customerName || 'N/A'}</td>
+                                <td>${formattedDate}</td>
+                                <td>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.totalPrice)}</td>
+                                <td>${paymentMethodMap[order.paymentMethod] || 'Không xác định'}</td>
+                                <td><span class="badge badge-success">Đã giao</span></td>
+                            </tr>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    const message = xhr.responseJSON?.message || 'Lỗi khi tải danh sách đơn hàng.';
+                    alert(message);
+                }
+            });
+        });
+    </script>
+}

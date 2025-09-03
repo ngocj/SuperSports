@@ -1,0 +1,10 @@
+﻿@model IEnumerable<SP.Application.Dto.BrandDto.BrandViewDto>
+
+@foreach (var brand in Model)
+{
+    <li class="brand-item">
+        <a class="d-block text-dark" href="#">
+            @brand.BrandName
+        </a>
+    </li>
+}

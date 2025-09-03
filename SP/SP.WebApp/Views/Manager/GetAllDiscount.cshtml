@@ -1,0 +1,249 @@
+﻿@model IEnumerable<SP.Application.Dto.DiscountDto.DiscountViewDto>
+@{
+    ViewData["Title"] = "Danh sách mã giảm giá";
+    Layout = "~/Views/Shared/_LayoutManager.cshtml";
+}
+        <div class="container-fluid p-4">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="page-title">
+                            <i class="bi bi-briefcase"></i> Quản lý mã giảm giá
+                        </h2>
+                <a href="@Url.Action("CreateDiscount", "Discount")" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Thêm  mới
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="form-control border-start-0"
+                       placeholder="Tìm kiếm khuyến mãi  ...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" width="70">ID</th>
+                                    <th class="text-center"">Tên mã giảm giá</th>
+                                    <th class="text-center">Giá trị giảm</th>
+                                    <th class="text-center">Ngày bắt đầu</th>
+                                    <th class="text-center"">Ngày kết thúc</th>
+                                    <th class="text-center" width="120">Trạng thái</th>
+                                    <th class="text-center" width="180">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var discount in Model)
+                                {
+                                    var statusClass = discount.IsActive
+                                    ? "badge bg-success-subtle text-success"
+                                    : "badge bg-danger-subtle text-danger";
+                                    var statusText = discount.IsActive ? "Hoạt động" : "Không hoạt động";
+                                    <tr data-name="@discount.Name.ToLower()" class="text-center align-middle">    
+                                        <td class="text-center">@discount.Id</td>
+                                        <td class="text-center">@discount.Name</td>
+                                        <td class="text-center">@discount.Percent %</td>
+                                        <td class="text-center">@discount.DateStart.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">@discount.DateEnd.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center"><span class="@statusClass status-badge">@statusText</span></td>
+                                        <td class="text-center">
+                                            <div class="action-buttons justify-content-center">
+                                                <a href="@Url.Action("UpdateDiscount", "Discount" ,new { id = discount.Id })" class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip" title="Chỉnh sửa">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("DeleteDiscount","Discount" , new { id = discount.Id })" class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa mã giảm giá này không?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>                              
+                              }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+<style>
+    /* Enhanced Styles for Brand Management Page */
+
+    :root {
+        --primary-color: #4361ee;
+        --primary-hover: #3a56d4;
+        --success-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --light-bg: #f8f9fa;
+        --border-color: #e9ecef;
+    }
+
+    body {
+        background-color: #f5f7fb;
+        color: #495057;
+    }
+
+    /* Page title styling */
+    .page-title {
+        color: #212529;
+        font-weight: 600;
+        font-size: 1.75rem;
+        margin-bottom: 0;
+    }
+
+    /* Card styling */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background-color: #fff;
+        transition: all 0.2s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.08);
+        }
+
+    .card-header {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Search form styling */
+    .search-wrapper {
+        max-width: 500px;
+    }
+
+        .search-wrapper .form-control:focus,
+        .search-wrapper .input-group-text {
+            box-shadow: none;
+            border-color: #ced4da;
+        }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    .btn-outline-danger {
+        color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+    /* Table styling */
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table > :not(caption) > * > * {
+            padding: 0.75rem 1rem;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+            .table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .table tbody tr:hover {
+                background-color: rgba(67, 97, 238, 0.03);
+            }
+
+    /* Badge styling */
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+        border-radius: 4px;
+    }
+
+    .bg-success-subtle {
+        background-color: rgba(46, 204, 113, 0.15);
+    }
+
+    .bg-danger-subtle {
+        background-color: rgba(231, 76, 60, 0.15);
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        padding: 2rem 0;
+        text-align: center;
+    }
+
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+
+        .search-box input {
+            padding-right: 35px;
+            border-radius: 20px;
+        }
+
+    .search-icon {
+        position: absolute;
+        right: 12px;
+        top: 10px;
+        color: #aaa;
+    }
+
+</style>
+@section Scripts {
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+          document.getElementById('searchInput').addEventListener('keyup', function () {
+                const searchTerm = this.value.toLowerCase();
+
+            document.querySelectorAll('tbody tr[data-name]').forEach(function (row) {
+                const description = row.getAttribute('data-name');
+                    if (description.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+
+    </script>
+}

@@ -1,0 +1,677 @@
+﻿@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var token = HttpContextAccessor.HttpContext?.Session.GetString("JwtToken");
+    var isLoggedIn = !string.IsNullOrEmpty(token);
+    string userName = "";
+    string role = "";
+    Guid idUser = Guid.Empty;
+
+    if (isLoggedIn)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        userName = jwtToken.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value ?? "";
+        role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value ?? "";
+        var claimUser = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid");
+
+        if (claimUser != null)
+        {
+            Guid.TryParse(claimUser.Value, out idUser);
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Mẫu thời trang nam" />
+    <meta name="keywords" content="Thời trang nam, unica, sáng tạo, html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>@ViewData["Title"] - Thời Trang Nam</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="~/SbHome/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/SbHome/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="~/SbHome/css/elegant-icons.css" />
+    <link rel="stylesheet" href="~/SbHome/css/magnific-popup.css" />
+    <link rel="stylesheet" href="~/SbHome/css/nice-select.css" />
+    <link rel="stylesheet" href="~/SbHome/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/SbHome/css/slicknav.min.css" />
+    <link rel="stylesheet" href="~/SbHome/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <!-- Top Bar -->
+        <div class="header__top">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 col-md-7">
+                        <p class="header__top__left mb-0 text-white">
+                            Miễn phí vận chuyển, đổi trả hoặc hoàn tiền trong 30 ngày.
+                        </p>
+                    </div>
+                    <div class="col-lg-6 col-md-5">
+                        <div class="header__top__right d-flex justify-content-end">
+                            @if (isLoggedIn)
+                            {
+                                <div class="header__top__links">
+                                    @{
+                                        var profileAction = role == "Employee" ? "ProfileEmployee" : "ProfileUser";
+                                    }
+                                    <a asp-controller="User" asp-action="@profileAction" asp-route-id="@idUser">
+                                        @userName
+                                    </a>
+
+                                </div>
+                                <div class="header__top__links">
+                                    <a asp-controller="Auth" asp-action="LogOut">Đăng xuất</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="header__top__links">
+                                    <a asp-controller="Auth" asp-action="LogIn">Đăng nhập</a>
+                                </div>
+                                <div class="header__top__links">
+                                    <a asp-controller="Auth" asp-action="Register">Đăng ký</a>
+                                </div>
+                            }
+                            <div class="header__top__hover ml-2">
+                                <span>
+                                    <img src="//supersports.com.vn/cdn/shop/t/230/assets/vi.png?v=78388546421581796491720174908"
+                                         alt="Vietnam" />
+                                    <i class="arrow_carrot-down"></i>
+                                </span>
+                                <ul>
+                                    <li>Vietnam</li>
+                                    <li>English</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-3">
+                    <div class="header__logo">
+                        <a asp-controller="Home" asp-action="Index">
+                            <img src="~/SbHome/img/super.png" alt="Logo" />
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6">
+                    <nav class="header__menu mobile-menu">
+                        <ul>
+                            @if (ViewBag.Categories is IEnumerable<SelectListItem> categories)
+                            {
+                                foreach (var category in categories)
+                                {
+                                    <li>
+                                        <a asp-controller="Home" asp-action="Collections"
+                                           asp-route-categoryId="@category.Value">
+                                            @category.Text
+                                        </a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="col-lg-3 col-md-3">
+                    <div class="header__nav__option d-flex align-items-center justify-content-end">
+                        <a class="search-switch" href="#" aria-label="Tìm kiếm">
+                            <img src="~/SbHome/img/icon/search.png" alt="Tìm kiếm" />
+                        </a>
+                        <a href="#" class="mx-3" aria-label="Yêu thích">
+                            <img src="~/SbHome/img/icon/heart.png" alt="Yêu thích" />
+                        </a>
+                        @if (isLoggedIn)
+                        {
+                            <a asp-controller="Cart" asp-action="GetAllCartByUserId"
+                               class="btn btn-outline-danger cart-link" aria-label="Giỏ hàng">
+                                <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Auth" asp-action="LogIn"
+                               class="btn btn-outline-danger" aria-label="Đăng nhập để xem giỏ hàng">
+                                <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas__open" aria-label="Mở menu">
+                <i class="fa fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <!-- About Column -->
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="footer__about">
+                        <div class="footer__logo mb-3">
+                            <a href="#">
+                                <img src="~/SbHome/img/footer-logo.png" alt="Footer Logo" />
+                            </a>
+                        </div>
+                        <p class="mb-3">
+                            Khách hàng là trung tâm trong mô hình kinh doanh độc đáo của chúng tôi,
+                            bao gồm thiết kế và sáng tạo.
+                        </p>
+                        <a href="#">
+                            <img src="~/SbHome/img/payment.png" alt="Phương thức thanh toán" />
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Shopping Column -->
+                <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6 class="mb-3">Mua sắm</h6>
+                        <ul>
+                            <li><a href="#">Cửa hàng quần áo</a></li>
+                            <li><a href="#">Giày xu hướng</a></li>
+                            <li><a href="#">Phụ kiện</a></li>
+                            <li><a href="#">Giảm giá</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Support Column -->
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6 class="mb-3">Hỗ trợ</h6>
+                        <ul>
+                            <li><a href="#">Liên hệ chúng tôi</a></li>
+                            <li><a href="#">Phương thức thanh toán</a></li>
+                            <li><a href="#">Giao hàng</a></li>
+                            <li><a href="#">Đổi/trả hàng</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Newsletter Column -->
+                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                    <div class="footer__widget">
+                        <h6 class="mb-3">Bản tin</h6>
+                        <div class="footer__newslatter">
+                            <p class="mb-3">
+                                Hãy là người đầu tiên biết về hàng mới, khuyến mãi và ưu đãi!
+                            </p>
+                            <form action="#">
+                                <input type="email" placeholder="Email của bạn" aria-label="Email của bạn" />
+                                <button type="submit">
+                                    <span class="icon_mail_alt"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="footer__copyright__text">
+                        <p class="mb-0">
+                            Bản quyền &copy; <span id="year"></span> Mọi quyền được bảo lưu |
+                            Mẫu giao diện được thiết kế với <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            bởi <a href="https://colorlib.com" target="_blank" rel="noopener noreferrer">Colorlib</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div class="search-model" aria-hidden="true">
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="search-close-switch" aria-label="Đóng tìm kiếm">&times;</div>
+            <form asp-controller="Home" asp-action="Search" method="get" class="search-model-form">
+                <input type="text" id="search-input" name="keyword"
+                       placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
+            </form>
+        </div>
+    </div>
+
+    <!-- Thêm chatbot icon và container vào cuối body, trước khi đóng thẻ </body> -->
+    <div id="chatbotIcon" style="position: fixed; bottom: 20px; right: 20px; cursor: pointer; z-index: 9999;">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" alt="Chatbot" style="width: 60px; height: 60px;">
+    </div>
+
+    <div class="chatbot-container" id="chatbot" style="display: none;">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span>Trợ lý ảo SuperSports</span>
+                <button type="button" class="close text-white" aria-label="Close" onclick="toggleChatbot()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body" id="chatMessages" style="height: 300px; overflow-y: auto;">
+                <div class="chat-message bot-message">
+                    <p>Xin chào! Tôi là trợ lý ảo của SuperSports. Tôi có thể giúp gì cho bạn về các sản phẩm thể thao?</p>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" id="userMessageInput" class="form-control" placeholder="Nhập tin nhắn..." onkeypress="handleKeyPress(event)">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button" onclick="sendMessage()">Gửi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Chatbot Container */
+        .chatbot-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            max-width: 95vw;
+            height: 450px;
+            background-color: #ffffff;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Nunito Sans', sans-serif;
+            animation: fadeInScale 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+            z-index: 9999;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Animation */
+        @@keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Header */
+        .chatbot-container .card-header {
+            background: linear-gradient(135deg, #2979ff, #1565c0);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        .chatbot-container .card-header .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.9;
+            transition: all 0.2s ease;
+            padding: 0 8px;
+            border-radius: 50%;
+        }
+
+        .chatbot-container .card-header .close:hover {
+            opacity: 1;
+            background-color: rgba(255,255,255,0.1);
+            transform: scale(1.1);
+        }
+
+        /* Chat Body */
+        .chatbot-container .card-body {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9ff;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Messages */
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            font-weight: 500;
+            line-height: 1.4;
+            user-select: text;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+
+        .chat-message:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .chat-message a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid currentColor;
+            transition: all 0.2s ease;
+        }
+
+        .chat-message a:hover {
+            opacity: 0.8;
+            border-bottom-color: transparent;
+        }
+
+        .bot-message {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            color: #1565C0;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            margin-right: 40px;
+        }
+
+                    .user-message {
+                background: linear-gradient(135deg, #2979ff, #2196f3);
+                color: #ffffff !important;
+                align-self: flex-end;
+                border-bottom-right-radius: 6px;
+                margin-left: 40px;
+            }
+            
+            .user-message p {
+                color: #ffffff !important;
+            }
+            
+            .user-message * {
+                color: #ffffff !important;
+            }
+
+        /* Scrollbar */
+        .chatbot-container .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chatbot-container .card-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chatbot-container .card-body::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 123, 255, 0.3);
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .chatbot-container .card-body::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 123, 255, 0.5);
+        }
+
+        /* Footer */
+        .chatbot-container .card-footer {
+            padding: 12px 16px;
+            background-color: #fff;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+        }
+
+        .chatbot-container .card-footer .input-group {
+            width: 100%;
+            gap: 12px;
+        }
+
+        .chatbot-container .card-footer input.form-control {
+            border-radius: 30px;
+            border: 2px solid #e0e0e0;
+            padding: 8px 14px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .chatbot-container .card-footer input.form-control:focus {
+            outline: none;
+            border-color: #2979ff;
+            box-shadow: 0 0 0 4px rgba(41, 121, 255, 0.1);
+            background-color: #fff;
+        }
+
+        .chatbot-container .card-footer .btn-primary {
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #2979ff, #1565c0);
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(41, 121, 255, 0.2);
+        }
+
+        .chatbot-container .card-footer .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(41, 121, 255, 0.3);
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+        }
+
+        .chatbot-container .card-footer .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(41, 121, 255, 0.2);
+        }
+
+        /* Mobile Responsiveness */
+        @@media (max-width: 480px) {
+            .chatbot-container {
+                width: 100vw;
+                height: 100vh;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+
+            .chatbot-container .card-header {
+                padding: 14px 20px;
+            }
+
+            .chatbot-container .card-body {
+                padding: 16px;
+            }
+
+            .chat-message {
+                max-width: 85%;
+            }
+
+            .chatbot-container .card-footer {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+
+    <!-- Add this hidden input for CSRF token -->
+    @Html.AntiForgeryToken()
+
+    <!-- JavaScript Libraries -->
+    <script src="~/SbHome/js/jquery-3.3.1.min.js"></script>
+    <script src="~/SbHome/js/bootstrap.min.js"></script>
+    <script src="~/SbHome/js/jquery.magnific-popup.min.js"></script>
+    <script src="~/SbHome/js/jquery.nice-select.min.js"></script>
+    <script src="~/SbHome/js/jquery-ui.min.js"></script>
+    <script src="~/SbHome/js/jquery.slicknav.js"></script>
+    <script src="~/SbHome/js/mixitup.min.js"></script>
+    <script src="~/SbHome/js/owl.carousel.min.js"></script>
+    <script src="~/SbHome/js/main.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Inline Scripts -->
+    <script>
+        // Get the CSRF token
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        // Toggle chatbot visibility
+        function toggleChatbot() {
+            var chatbot = document.getElementById('chatbot');
+            if (chatbot.style.display === 'none' || chatbot.style.display === '') {
+                chatbot.style.display = 'block';
+                // Focus on input when chatbot opens
+                setTimeout(() => {
+                    document.getElementById('userMessageInput').focus();
+                }, 100);
+            } else {
+                chatbot.style.display = 'none';
+            }
+        }
+
+        // Handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Send message to server
+        function sendMessage() {
+            const input = document.getElementById('userMessageInput');
+            const message = input.value.trim();
+
+            if (message === '') return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            const chatMessages = document.getElementById('chatMessages');
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'chat-message bot-message';
+            typingIndicator.innerHTML = '<p>Đang trả lời...</p>';
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Send to server
+            fetch('/ChatBotGemini/SendMessageGemini', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': csrfToken
+                },
+                body: JSON.stringify({ text: message })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+
+                    if (data.success) {
+                        addMessage(data.reply, 'bot');
+                    } else {
+                        addMessage(`Xin lỗi, có lỗi xảy ra: ${data.reply}`, 'bot');
+                    }
+                })
+                .catch(error => {
+                    chatMessages.removeChild(typingIndicator);
+                    addMessage('Không thể kết nối đến trợ lý. Vui lòng thử lại sau.', 'bot');
+                    console.error('Error:', error);
+                });
+        }
+
+        // Add message to chat UI
+        function addMessage(text, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+
+            // Convert markdown-style links to HTML links
+            const processedText = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+                '<a href="$2" target="_blank" style="color: ' + (sender === 'bot' ? '#0056b3' : '#ffffff') + ';">$1</a>');
+
+            messageDiv.innerHTML = `<p>${processedText}</p>`;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Initialize chatbot icon click event
+        document.getElementById('chatbotIcon').addEventListener('click', toggleChatbot);
+    </script>
+
+    @RenderSection("Scripts", required: false)
+    @RenderSection("Style", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.onload = function () {
+            var successMessage = '@Html.Raw(TempData["Success"])';
+            var errorMessage = '@Html.Raw(TempData["Error"])';
+
+            if (successMessage && successMessage !== "null") {
+                Swal.fire({
+                    title: "Thành công!",
+                    text: successMessage,
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Đồng ý"
+                });
+            }
+
+            if (errorMessage && errorMessage !== "null") {
+                Swal.fire({
+                    title: "Lỗi!",
+                    text: errorMessage,
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                    confirmButtonText: "Đóng"
+                });
+            }
+        };
+    </script>
+
+</body>
+
+
+</html>
+
+

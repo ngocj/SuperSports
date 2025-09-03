@@ -1,0 +1,115 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Migrations\\20250903114251_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SP.Infrastructure\\Migrations\\20250903114251_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F882D621-261F-479B-9B8E-DEE65EC5DDD1}|SP.WebApi\\SP.WebApi.csproj|d:\\b\u00E0i t\u1EADp\\datn_k16\\nguyenbaongoc_2021602053_datn\\sp\\sp.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F882D621-261F-479B-9B8E-DEE65EC5DDD1}|SP.WebApi\\SP.WebApi.csproj|solutionrelative:sp.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E66CE6D-A94A-4AE2-B3F8-E22950AADD47}|SP.Infrastructure\\SP.Infrastructure.csproj|d:\\b\u00E0i t\u1EADp\\datn_k16\\nguyenbaongoc_2021602053_datn\\sp\\sp.infrastructure\\repositories\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E66CE6D-A94A-4AE2-B3F8-E22950AADD47}|SP.Infrastructure\\SP.Infrastructure.csproj|solutionrelative:sp.infrastructure\\repositories\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E66CE6D-A94A-4AE2-B3F8-E22950AADD47}|SP.Infrastructure\\SP.Infrastructure.csproj|d:\\b\u00E0i t\u1EADp\\datn_k16\\nguyenbaongoc_2021602053_datn\\sp\\sp.infrastructure\\repositories\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E66CE6D-A94A-4AE2-B3F8-E22950AADD47}|SP.Infrastructure\\SP.Infrastructure.csproj|solutionrelative:sp.infrastructure\\repositories\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DDD21B6-992C-4395-B504-697BA146C4A6}|SP.WebApp\\SP.WebApp.csproj|d:\\b\u00E0i t\u1EADp\\datn_k16\\nguyenbaongoc_2021602053_datn\\sp\\sp.webapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DDD21B6-992C-4395-B504-697BA146C4A6}|SP.WebApp\\SP.WebApp.csproj|solutionrelative:sp.webapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20250903114251_init.cs",
+              "DocumentMoniker": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Migrations\\20250903114251_init.cs",
+              "RelativeDocumentMoniker": "SP.Infrastructure\\Migrations\\20250903114251_init.cs",
+              "ToolTip": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Migrations\\20250903114251_init.cs",
+              "RelativeToolTip": "SP.Infrastructure\\Migrations\\20250903114251_init.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T11:42:51.494Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.WebApi\\appsettings.json",
+              "RelativeDocumentMoniker": "SP.WebApi\\appsettings.json",
+              "ToolTip": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.WebApi\\appsettings.json",
+              "RelativeToolTip": "SP.WebApi\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-03T11:41:28.022Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f53-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "GenericRepository.cs",
+              "DocumentMoniker": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Repositories\\GenericRepository.cs",
+              "RelativeDocumentMoniker": "SP.Infrastructure\\Repositories\\GenericRepository.cs",
+              "ToolTip": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Repositories\\GenericRepository.cs",
+              "RelativeToolTip": "SP.Infrastructure\\Repositories\\GenericRepository.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABsAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-10T02:49:53.034Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IGenericRepository.cs",
+              "DocumentMoniker": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Repositories\\IGenericRepository.cs",
+              "RelativeDocumentMoniker": "SP.Infrastructure\\Repositories\\IGenericRepository.cs",
+              "ToolTip": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.Infrastructure\\Repositories\\IGenericRepository.cs",
+              "RelativeToolTip": "SP.Infrastructure\\Repositories\\IGenericRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-10T02:49:39.084Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.WebApp\\Program.cs",
+              "RelativeDocumentMoniker": "SP.WebApp\\Program.cs",
+              "ToolTip": "D:\\B\u00C0I T\u1EACP\\DATN_K16\\NguyenBaoNgoc_2021602053_DATN\\SP\\SP.WebApp\\Program.cs",
+              "RelativeToolTip": "SP.WebApp\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABYAAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-22T03:30:13.675Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

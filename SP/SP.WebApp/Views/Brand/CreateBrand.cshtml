@@ -1,0 +1,135 @@
+﻿@model SP.Application.Dto.BrandDto.BrandCreateDto
+@{
+    ViewData["Title"] = "CreateBrand";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+div class="container py-5">
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h2 class="card-title mb-0">Tạo thương hiệu mới</h2>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateBrand" asp-controller="Brand" method="post">
+
+
+                    <div class="mb-4">
+                        <label asp-for="BrandName" class="form-label fw-bold">Tên thương hiệu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-folder"></i></span>
+                            <input asp-for="BrandName" class="form-control" placeholder="Nhập tên thương hiệu" required />
+                        </div>
+                        <span asp-validation-for="BrandName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-bold">Mô tả</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-align-left"></i></span>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết về thương hiệu"></textarea>
+                        </div>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">Kích hoạt thương hiệu</label>
+                    </div>
+
+                    <div class="text-center mt-">
+                        <button type="submit" class="btn btn-primary px-4 py-2" style="margin-right: 15px;">
+                            <i class="fas fa-plus-circle me-2"></i>  Tạo mới
+                        </button>
+                        <a href="@Url.Action("GetAllBrand", "Admin")" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="fas fa-times-circle me-2"></i>  Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    .card-header {
+        border-bottom: none;
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    }
+
+    .form-control, .input-group-text {
+        border-radius: 5px;
+        padding: 10px 15px;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            border-color: #0d6efd;
+        }
+
+    .input-group-text {
+        min-width: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn {
+        border-radius: 5px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0a58ca, #084298);
+            transform: translateY(-2px);
+        }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        $(document).ready(function () {
+            // Hiển thị animation khi form load
+            $(".card").hide().fadeIn(800);
+
+            // Thêm hiệu ứng khi focus vào input
+            $(".form-control").focus(function () {
+                $(this).parent().addClass("border-primary");
+            }).blur(function () {
+                $(this).parent().removeClass("border-primary");
+            });
+
+            // Tự động ẩn thông báo lỗi sau 5 giây
+            setTimeout(function () {
+                $(".alert").slideUp();
+            }, 5000);
+        });
+    </script>
+}
+

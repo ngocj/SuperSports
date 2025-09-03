@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Quản lý bán quần áo" />
+    <meta name="author" content="" />
+    <title>SuperSports - Trang quản trị</title>
+
+    <!-- Font và style -->
+    <link href="~/SbAdmin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet" />
+
+    <!-- CSS của sb-admin -->
+    <link href="~/SbAdmin/css/sb-admin-2.min.css" rel="stylesheet" />
+
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel="stylesheet" />
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Logo -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-action="Index" asp-controller="Employee">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">SuperSports</div>
+            </a>
+
+            <li class="nav-item active">
+                <a class="nav-link" asp-action="Index" asp-controller="Home">
+                    <i class="fas fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <!-- Quản lý hệ thống -->
+            <div class="sidebar-heading">Quản lý cửa hàng</div>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-action="GetAllOrder" asp-controller="Employee">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Đơn hàng</span>
+                </a>
+            </li>
+         
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-controller="Employee">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+         
+
+        </ul>
+        <!-- End Sidebar -->
+        <!-- Nội dung chính -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            @RenderBody()
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="text-center my-auto">
+                        <span>Bản quyền &copy; SuperSports 2025</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Nút cuộn lên đầu -->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Modal đăng xuất -->
+    <div class="modal fade"
+         id="logoutModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bạn có chắc muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" để kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <a class="btn btn-primary" href="login.html">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <!-- jQuery phải load đầu tiên -->
+    <script src="~/SbAdmin/vendor/jquery/jquery.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- Bootstrap Bundle -->
+    <script src="~/SbAdmin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery easing -->
+    <script src="~/SbAdmin/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="~/SbAdmin/js/sb-admin-2.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="~/SbAdmin/vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Nếu bạn chắc chắn trang này có canvas chart thì bật 2 script dưới, nếu không thì comment đi -->
+    <script src="~/SbAdmin/js/demo/chart-area-demo.js"></script>
+    <script src="~/SbAdmin/js/demo/chart-pie-demo.js"></script>
+
+    @RenderSection("Scripts", required: false)
+    @RenderSection("Styles", required: false)
+
+</body>
+</html>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    window.onload = function () {
+        var successMessage = '@Html.Raw(TempData["Success"])';
+        var errorMessage = '@Html.Raw(TempData["Error"])';
+
+        if (successMessage && successMessage !== "null") {
+            Swal.fire({
+                title: "Thành công!",
+                text: successMessage,
+                icon: "success",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Đồng ý",
+            });
+        }
+
+        if (errorMessage && errorMessage !== "null") {
+            Swal.fire({
+                title: "Lỗi!",
+                text: errorMessage,
+                icon: "error",
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Đóng",
+            });
+        }
+    };
+</script>

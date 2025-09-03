@@ -1,0 +1,533 @@
+﻿@model List<SP.Application.Dto.OrderDto.OrderViewDto>
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Order History Section Begin -->
+<section class="order-history-section">
+    <div class="container">
+        <div class="section-title text-center mb-4">
+            <h2>Lịch sử đơn hàng</h2>
+            <p>Xem lại tất cả các đơn hàng bạn đã đặt tại cửa hàng của chúng tôi</p>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-shopping-bag fa-3x"></i>
+                </div>
+                <div class="empty-text mb-3 h5">Bạn chưa có đơn hàng nào</div>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>Bắt đầu mua sắm
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Thống kê đơn hàng -->
+        @using SP.Domain.Entity
+
+            <div class="order-stats mb-4">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Count()</div>
+                    <div class="stat-label">Tổng đơn hàng</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Count(x => x.Status == OrderStatus.Delivered)</div>
+                    <div class="stat-label">Đơn đã giao</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        @Model.Count(x => x.Status == OrderStatus.Pending || x.Status == OrderStatus.Confirmed || x.Status == OrderStatus.Shipping || x.Status == OrderStatus.Paid)
+                    </div>
+                    <div class="stat-label">Đơn đang xử lý</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        @Model.Count(x => x.Status == OrderStatus.Canceled)
+                    </div>
+                    <div class="stat-label">Đơn đã hủy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        @(Model.Where(x => x.Status == OrderStatus.Delivered).Sum(x => x.TotalPrice).ToString("N0")) ₫
+                    </div>
+                    <div class="stat-label">Tổng chi tiêu</div>
+                </div>
+            </div>
+
+            <div class="orders-container">
+                @foreach (var order in Model)
+                {
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-number">Đơn hàng <span>#@order.Id</span></div>
+                                <div class="order-date">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                            <div class="order-status">
+                                <span class="status-badge
+                                     @(order.Status.ToString() == "Pending" ? "status-pending" :
+                                        order.Status.ToString() == "Confirmed" ? "status-processing" :
+                                        order.Status.ToString() == "Shipping" ? "status-processing" :
+                                        order.Status.ToString() == "Delivered" ? "status-completed" :
+                                        order.Status.ToString() == "Paid" ? "status-paid" : "status-cancelled")">
+                                    @(order.Status.ToString() == "Pending" ? "Chờ xác nhận" :
+                                        order.Status.ToString() == "Confirmed" ? "Đã xác nhận" :
+                                        order.Status.ToString() == "Shipping" ? "Đang giao hàng" :
+                                        order.Status.ToString() == "Delivered" ? "Đã giao hàng" :
+                                        order.Status.ToString() == "Paid" ? "Đã thanh toán" : "Đã huỷ")
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="order-products">
+                            @if (order.OrderDetails != null && order.OrderDetails.Any())
+                            {
+                                foreach (var detail in order.OrderDetails) // Hiển thị hết sản phẩm
+                                {
+                                    var variant = detail.ProductVariant;
+                                    <div class="product-item">
+                                        <div class="product-thumb">
+                                            @if (variant != null && variant.Images != null && variant.Images.Any())
+                                            {
+                                                var imageFile = variant.Images.First();
+                                                var imageSrc = imageFile?.FileData != null
+                                                ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                                : "";
+                                                <img src="@imageSrc" alt="@variant?.ProductName" />
+                                            }
+                                            else
+                                            {
+                                                <div class="no-image">
+                                                    <i class="fas fa-box-open"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="product-info">
+                                            <div class="product-name">@(variant?.ProductName ?? "Sản phẩm không tồn tại")</div>
+                                            <div class="product-variant">
+                                                @if (variant != null)
+                                                {
+                                                    <span>Size: @variant.Size</span>
+                                                    <span>Màu: @variant.Color</span>
+                                                }
+                                            </div>
+                                            <div class="product-price">@detail.Price.ToString("N0") ₫ x @detail.Quantity</div>
+
+                                            @if (order.Status == OrderStatus.Delivered)
+                                            {
+                                                <a asp-controller="Feedback" asp-action="CreateFeedback"
+                                                   asp-route-orderId="@order.Id"
+                                                   asp-route-productVariantId="@detail.ProductVariantId"
+                                                   class="btn btn-outline-success feedback-btn mt-2">
+                                                    <i class="fas fa-star pr-2 text-center"></i> Đánh giá 
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-products">Không có sản phẩm trong đơn hàng</div>
+                            }
+                        </div>
+
+
+                        <div class="order-footer">
+                            <div class="order-total">
+                                Tổng cộng: <span>@order.TotalPrice.ToString("N0") ₫</span>
+                            </div>
+                            <div class="order-actions">
+                               @*  <a asp-action="Detail" asp-controller="Home" asp-route-id="@order.OrderDetails.FirstOrDefault().ProductVariant.ProductId" class="detail-btn">
+                                    Xem chi tiết
+                                </a> *@
+                                @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Confirmed)
+                                {
+                                    <a href="@Url.Action("CancelOrder", "Order", new { id = order.Id })"
+                                       class="btn btn-warning"
+                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+                                        <i class="fas fa-times me-1"></i> Huỷ đơn hàng
+                                    </a>
+                                }                             
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+
+
+@section Styles {
+    <style>
+        .order-history-section {
+            padding: 40px 0;
+        }
+
+        .section-title {
+            margin-bottom: 30px;
+        }
+
+            .section-title h2 {
+                font-size: 28px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .section-title p {
+                color: #666;
+                font-size: 16px;
+            }
+
+        /* Thống kê đơn hàng */
+        .order-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Danh sách đơn hàng */
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-number {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+            .order-number span {
+                color: #2a9dcc;
+            }
+
+        .order-date {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-paid {
+            background: #e2e3f3; 
+            color: #383d75; 
+        }
+
+        /* Sản phẩm trong đơn hàng */
+        .order-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-item {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .product-thumb {
+            width: 70px;
+            height: 70px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eee;
+        }
+
+            .product-thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .no-image {
+            color: #ccc;
+            font-size: 20px;
+        }
+
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .product-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-variant {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-price {
+            font-size: 13px;
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .more-products {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        /* Footer đơn hàng */
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #f5f5f5;
+        }
+
+        .order-total {
+            font-size: 16px;
+            color: #333;
+        }
+
+            .order-total span {
+                font-weight: 600;
+                color: #e74c3c;
+            }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .detail-btn, .cancel-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .detail-btn {
+            background: #3498db;
+            color: white;
+            border: 1px solid #3498db;
+        }
+
+            .detail-btn:hover {
+                background: #2980b9;
+                transform: translateY(-2px);
+            }
+
+        .cancel-btn {
+            background: #fff;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+            .cancel-btn:hover {
+                background: #e74c3c;
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        /* Trạng thái rỗng */
+        .empty-state {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .empty-icon {
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .feedback-btn {
+            border: 1px solid #28a745;
+            color: #28a745;
+            background-color: transparent;
+            padding: 6px 12px; /* Giảm padding để gọn hơn */
+            border-radius: 6px;
+            font-size: 14px; /* Tăng font size nhẹ cho dễ đọc */
+            font-weight: 600; /* Đậm hơn để nổi bật */
+            display: inline-flex;
+            align-items: center;
+            gap: 6px; /* Khoảng cách giữa icon và text */
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            white-space: nowrap; /* Không xuống dòng */
+            box-shadow: 0 2px 5px rgb(40 167 69 / 0.2); /* Bóng nhẹ cho nổi */
+        }
+
+            .feedback-btn i {
+                font-size: 16px; /* Icon to hơn 1 chút */
+                line-height: 1;
+            }
+
+            .feedback-btn:hover {
+                background-color: #28a745;
+                color: #fff;
+                transform: translateY(-2px);
+                text-decoration: none;
+                box-shadow: 0 6px 12px rgb(40 167 69 / 0.4);
+            }
+
+
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-products {
+                grid-template-columns: 1fr;
+            }
+
+            .order-footer {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .order-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .order-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .order-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .detail-btn, .cancel-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+}

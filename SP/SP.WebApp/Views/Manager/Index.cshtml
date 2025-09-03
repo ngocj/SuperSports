@@ -1,0 +1,677 @@
+﻿@{
+    ViewData["Title"] = "Bảng Thống Kê Đơn Hàng";
+    Layout = "~/Views/Shared/_LayoutManager.cshtml";
+}
+
+<div id="content">
+    <!-- Thanh tiêu đề -->
+    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-chart-line fa-fw mr-2 text-gray-800"></i>
+            <h1 class="h4 mb-0 text-gray-800">Bảng Thống Kê Đơn Hàng</h1>
+        </div>
+
+        <!-- Thời gian cập nhật -->
+        <div class="ml-auto d-flex align-items-center">
+            <small class="text-muted mr-2">Cập nhật lần cuối: <span id="lastUpdated"></span></small>
+            <button id="refreshBtn" class="btn btn-sm btn-light rounded-circle">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Nội dung chính -->
+    <div class="container-fluid">
+        <!-- Các thẻ trạng thái -->
+        <div class="row">
+            <!-- Đơn đang chờ -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Đơn đang chờ
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <span id="pendingCount">--</span>
+                                    <small class="text-muted ml-1">đơn</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clock fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đơn đang giao -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Đơn đang giao
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <span id="shippingCount">--</span>
+                                    <small class="text-muted ml-1">đơn</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-truck fa-2x text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đơn đã giao -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Đơn đã giao
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <span id="deliveredCount">--</span>
+                                    <small class="text-muted ml-1">đơn</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đơn đã hủy -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Đơn đã hủy
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    <span id="canceledCount">--</span>
+                                    <small class="text-muted ml-1">đơn</small>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doanh thu -->
+        <div class="row">
+            <!-- Tổng doanh thu -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Tổng Doanh Thu</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <div class="h2 font-weight-bold text-success mb-4" id="totalRevenue">--</div>
+                            <div class="small text-muted">Tổng doanh thu từ các đơn hàng đã hoàn tất</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doanh thu theo khoảng thời gian -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Doanh Thu Theo Khoảng Ngày</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row align-items-center mb-3">
+                            <div class="col-md-5">
+                                <input type="date" id="fromDate" class="form-control">
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <span class="text-muted">đến</span>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="date" id="toDate" class="form-control">
+                            </div>
+                            <div class="col-md-1">
+                                <button id="btnGetRevenue" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="h4 font-weight-bold text-gray-800 mb-2" id="rangeRevenueResult">--</div>
+                            <div id="rangeInfo" class="small text-muted">Vui lòng chọn khoảng thời gian</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sản phẩm bán chạy -->
+        <div class="row">
+            <div class="col-lg-12 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Sản Phẩm Bán Chạy</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" href="#" data-top="5">Top 5</a>
+                                <a class="dropdown-item" href="#" data-top="10">Top 10</a>
+                                <a class="dropdown-item" href="#" data-top="20">Top 20</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="topProductsTable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Hạng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Phân loại</th>
+                                        <th class="text-right">Đã bán</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topProductsBody">
+                                    <!-- Sản phẩm sẽ được tải ở đây -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ doanh thu theo tháng -->
+        <div class="row">
+            <div class="col-lg-12 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Doanh Thu Theo Tháng</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="revenueDropdown"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                <a class="dropdown-item" href="#" data-period="month">Tháng này</a>
+                                <a class="dropdown-item" href="#" data-period="quarter">Quý này</a>
+                                <a class="dropdown-item" href="#" data-period="year">Năm này</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê chi tiết -->
+        <div class="row">
+            <!-- Thống kê đơn hàng -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Phân Tích Đơn Hàng</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="small font-weight-bold">Tỷ lệ hoàn thành<span class="float-right" id="completionRate">--</span></div>
+                                <div class="progress mb-4">
+                                    <div class="progress-bar bg-success" role="progressbar" id="completionRateBar"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small font-weight-bold">Tỷ lệ hủy<span class="float-right" id="cancellationRate">--</span></div>
+                                <div class="progress mb-4">
+                                    <div class="progress-bar bg-danger" role="progressbar" id="cancellationRateBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="mb-0">
+                                <i class="fas fa-shopping-cart text-primary"></i>
+                                Giá trị đơn hàng trung bình: <span id="avgOrderValue" class="font-weight-bold">--</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top khách hàng -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Top Khách Hàng</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="topCustomersTable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th class="text-right">Số đơn</th>
+                                        <th class="text-right">Tổng chi tiêu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topCustomersBody">
+                                    <!-- Top khách hàng sẽ được tải ở đây -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <style>
+        .card {
+            transition: all 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            }
+
+        #refreshBtn:hover {
+            background-color: #f8f9fa;
+            transform: rotate(180deg);
+            transition: transform 0.5s ease;
+        }
+
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+
+        .top-product-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(amount);
+            }
+
+            // Format date
+            function formatDate(date) {
+                return new Date(date).toLocaleString();
+            }
+
+            // Set default dates (last 30 days)
+            function setDefaultDates() {
+                const today = new Date();
+                const lastMonth = new Date();
+                lastMonth.setDate(lastMonth.getDate() - 30);
+
+                $('#toDate').val(today.toISOString().split('T')[0]);
+                $('#fromDate').val(lastMonth.toISOString().split('T')[0]);
+            }
+
+            // Load all statistics
+            async function loadAllStatistics() {
+                try {
+                    // Show loading state
+                    $('.card-body').addClass('loading');
+
+                    const response = await fetch('@Url.Action("GetAllStatistics", "OrderDetail")');
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+
+                    // Update basic stats
+                    const basicStats = data.basicStats;
+                    $('#pendingCount').text(basicStats.pendingCount.toLocaleString());
+                    $('#shippingCount').text(basicStats.shippingCount.toLocaleString());
+                    $('#deliveredCount').text(basicStats.deliveredCount.toLocaleString());
+                    $('#canceledCount').text(basicStats.canceledCount.toLocaleString());
+                    $('#totalRevenue').text(formatCurrency(basicStats.totalRevenue));
+
+                    // Update detailed stats
+                    const detailedStats = data.detailedStats;
+                    $('#completionRate').text(detailedStats.completionRate + '%');
+                    $('#completionRateBar').css('width', detailedStats.completionRate + '%');
+                    
+                    $('#cancellationRate').text(detailedStats.cancellationRate + '%');
+                    $('#cancellationRateBar').css('width', detailedStats.cancellationRate + '%');
+                    
+                    $('#avgOrderValue').text(formatCurrency(detailedStats.averageOrderValue));
+
+                    // Update top products table with current limit
+                    await updateTopProducts(currentTopLimit);
+
+                    // Update top customers table
+                    const topCustomersBody = $('#topCustomersBody');
+                    topCustomersBody.empty();
+                    
+                    detailedStats.topCustomers.forEach(customer => {
+                        topCustomersBody.append(`
+                            <tr>
+                                <td>${customer.name}</td>
+                                <td class="text-right">${customer.orderCount}</td>
+                                <td class="text-right">${formatCurrency(customer.totalSpent)}</td>
+                            </tr>
+                        `);
+                    });
+
+                    // Update last updated time
+                    $('#lastUpdated').text(formatDate(new Date()));
+
+                } catch (error) {
+                    console.error('Error loading statistics:', error);
+                    showErrorToast('Failed to load statistics. Please try again.');
+                } finally {
+                    $('.card-body').removeClass('loading');
+                }
+            }
+
+            // Load top products
+            async function updateTopProducts(limit) {
+                try {
+                    const response = await fetch(`@Url.Action("GetTopProducts", "OrderDetail")?top=${limit}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to get top products');
+                    }
+
+                    const products = await response.json();
+                    const topProductsBody = $('#topProductsBody');
+                    topProductsBody.empty();
+
+                    products.forEach((product, index) => {
+                        topProductsBody.append(`
+                            <tr class="top-product-row">
+                                <td>${index + 1}</td>
+                                <td>${product.name}</td>
+                                <td>${product.size} - ${product.color}</td>
+                                <td class="text-right">${product.quantity.toLocaleString()}</td>
+                            </tr>
+                        `);
+                    });
+                } catch (error) {
+                    console.error('Error updating top products:', error);
+                    $('#topProductsBody').html('<tr><td colspan="4" class="text-center">Không thể tải dữ liệu</td></tr>');
+                }
+            }
+
+            // Track current top products limit
+            let currentTopLimit = 5; // Default to top 5
+
+            // Handle dropdown selection for top products
+            $('.dropdown-item[data-top]').click(function(e) {
+                e.preventDefault();
+                currentTopLimit = parseInt($(this).data('top'));
+                updateTopProducts(currentTopLimit);
+            });
+
+            // Handle date range revenue request
+            async function getRevenueByDateRange(from, to) {
+                try {
+                    $('#rangeRevenueResult').text('Loading...');
+                    $('#rangeInfo').text(`From ${from} to ${to}`);
+
+                    const response = await fetch(`@Url.Action("GetRevenueByDateRange", "OrderDetail")?from=${from}&to=${to}`);
+
+                    if (!response.ok) {
+                        throw new Error('Failed to get revenue data');
+                    }
+
+                    const total = await response.json();
+                    $('#rangeRevenueResult').text(formatCurrency(total));
+
+                } catch (error) {
+                    console.error('Error getting revenue by date range:', error);
+                    $('#rangeRevenueResult').text('Error');
+                    $('#rangeInfo').text(error.message);
+                }
+            }
+
+            // Show error toast
+            function showErrorToast(message) {
+                const toast = `<div class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+                            <div class="toast-header">
+                                <strong class="mr-auto">Error</strong>
+                                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                        </div>`;
+
+                $(toast).toast({ delay: 5000 }).toast('show');
+            }
+
+            // Initialize page
+            setDefaultDates();
+            loadAllStatistics();
+            updateTopProducts(currentTopLimit); // Load initial top products
+
+            // Set up event handlers
+            $('#btnGetRevenue').click(() => {
+                const from = $('#fromDate').val();
+                const to = $('#toDate').val();
+
+                if (!from || !to) {
+                    showErrorToast('Vui lòng chọn cả ngày bắt đầu và kết thúc');
+                    return;
+                }
+
+                if (new Date(from) > new Date(to)) {
+                    showErrorToast('Ngày kết thúc phải sau ngày bắt đầu');
+                    return;
+                }
+
+                getRevenueByDateRange(from, to);
+            });
+
+            $('#refreshBtn').click(() => {
+                loadAllStatistics();
+                updateTopProducts(currentTopLimit);
+            });
+
+            // Load revenue chart
+            async function loadRevenueChart(period = 'month') {
+                try {
+                    const response = await fetch(`@Url.Action("GetRevenueByPeriod", "OrderDetail")?period=${period}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    
+                    const data = await response.json();
+                    
+                    revenueChart.data.labels = data.labels;
+                    revenueChart.data.datasets[0].data = data.values;
+                    revenueChart.update();
+                    
+                } catch (error) {
+                    console.error('Error loading revenue chart:', error);
+                    showErrorToast('Không thể tải dữ liệu biểu đồ doanh thu');
+                }
+            }
+
+            // Handle chart period selection
+            $(document).on('click', '.dropdown-item[data-period]', function(e) {
+                e.preventDefault();
+                const period = $(this).data('period');
+                loadRevenueChart(period);
+            });
+
+            // Initialize revenue chart
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            let revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Load revenue chart initially
+            loadRevenueChart();
+
+            // Auto-refresh every 5 minutes
+            setInterval(loadAllStatistics, 5 * 60 * 1000);
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo biểu đồ doanh thu
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            let revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Load thống kê chi tiết
+            async function loadDetailedStatistics() {
+                try {
+                    const response = await fetch('@Url.Action("GetDetailedStatistics", "OrderDetail")');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    
+                    const data = await response.json();
+                    
+                    // Cập nhật tỷ lệ
+                    $('#completionRate').text(data.completionRate + '%');
+                    $('#completionRateBar').css('width', data.completionRate + '%');
+                    
+                    $('#cancellationRate').text(data.cancellationRate + '%');
+                    $('#cancellationRateBar').css('width', data.cancellationRate + '%');
+                    
+                    // Cập nhật giá trị trung bình
+                    $('#avgOrderValue').text(formatCurrency(data.averageOrderValue));
+                    
+                    // Cập nhật top khách hàng
+                    const topCustomersBody = $('#topCustomersBody');
+                    topCustomersBody.empty();
+                    
+                    data.topCustomers.forEach(customer => {
+                        topCustomersBody.append(`
+                            <tr>
+                                <td>${customer.name}</td>
+                                <td class="text-right">${customer.orderCount}</td>
+                                <td class="text-right">${formatCurrency(customer.totalSpent)}</td>
+                            </tr>
+                        `);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading detailed statistics:', error);
+                    showErrorToast('Không thể tải thống kê chi tiết');
+                }
+            }
+
+            // Load doanh thu theo thời gian
+            async function loadRevenueChart(period = 'month') {
+                try {
+                    const response = await fetch(`@Url.Action("GetRevenueByPeriod", "OrderDetail")?period=${period}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    
+                    const data = await response.json();
+                    
+                    revenueChart.data.labels = data.labels;
+                    revenueChart.data.datasets[0].data = data.values;
+                    revenueChart.update();
+                    
+                } catch (error) {
+                    console.error('Error loading revenue chart:', error);
+                    showErrorToast('Không thể tải dữ liệu biểu đồ doanh thu');
+                }
+            }
+
+            // Load tất cả thống kê chi tiết khi trang được tải
+            loadDetailedStatistics();
+            loadRevenueChart();
+
+            // Xử lý sự kiện chọn khoảng thời gian cho biểu đồ
+            $(document).on('click', '.dropdown-item[data-period]', function(e) {
+                e.preventDefault();
+                const period = $(this).data('period');
+                loadRevenueChart(period);
+            });
+
+            // Tự động làm mới dữ liệu
+            setInterval(() => {
+                loadDetailedStatistics();
+                loadRevenueChart();
+            }, 5 * 60 * 1000);
+        });
+    </script>
+}

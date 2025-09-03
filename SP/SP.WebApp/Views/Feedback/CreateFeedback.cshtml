@@ -1,0 +1,326 @@
+﻿@model SP.Application.Dto.FeedbackDto.FeedbackCreateDto
+
+@{
+    ViewData["Title"] = "Create Feedback";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <div class="d-flex align-items-center">
+                        <a href="#" class="text-decoration-none me-3" onclick="window.history.back()">
+                            <i class="bi bi-arrow-left text-dark pr-2"></i>
+                        </a>
+                        <h1 class="h5 mb-0 text-dark fw-semibold">  ĐÁNH GIÁ SẢN PHẨM</h1>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="CreateFeedback" method="post" class="needs-validation" novalidate>
+                        <!-- Hidden fields -->
+                        <input asp-for="OrderId" type="hidden" />
+                        <input asp-for="ProductVariantId" type="hidden" />
+                        <input asp-for="UserId" type="hidden" />
+
+                        <!-- Product Info -->
+                        <div class="d-flex mb-4 align-items-start">
+                            <div class="flex-shrink-0 me-3">
+                                @if (Model.OrderDetail?.ProductVariant?.Images?.Any() == true)
+                                {
+                                    var variant = Model.OrderDetail.ProductVariant;
+                                    var imageFile = variant.Images.FirstOrDefault();
+                                    var imageSrc = imageFile?.FileData != null
+                                    ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                    : "";
+                                    var altText = imageFile?.FileData != null ? variant.ProductName : "Không có ảnh";
+                                    <img src="@imageSrc" alt="@altText" class="rounded-2" style="width: 80px; height: 80px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="no-image mb-1">Không có ảnh</div>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="text-dark fw-semibold mb-2">
+                                    @Model.OrderDetail?.ProductVariant.ProductName
+                                </h4>
+                                <p class="mb-1 text-muted"><strong>Size:</strong> @Model.OrderDetail?.ProductVariant.Size</p>
+                                <p class="mb-1 text-muted"><strong>Màu:</strong> @Model.OrderDetail?.ProductVariant.Color</p>
+                                <p class="mb-1 text-muted"><strong>Giá:</strong> @Model.OrderDetail?.ProductVariant.Price.ToString("N0") ₫</p>
+                            </div>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold d-block mb-3 text-dark">Đánh giá của bạn <span class="text-danger">*</span></label>
+                            <div class="rating-input mb-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="star" data-value="@i">
+                                        <i class="bi bi-star-fill"></i>
+                                    </span>
+                                }
+                                <input type="hidden" asp-for="Rating" id="ratingValue" required />
+                            </div>
+                            <div class="d-flex justify-content-between w-75">
+                                <span class="text-muted small">Rất tệ</span>
+                                <span class="text-muted small">Tốt</span>
+                                <span class="text-muted small">Bình thường</span>
+                                <span class="text-muted small">Rất tốt</span>
+                                <span class="text-muted small">Xuất sắc</span>
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <!-- Comment -->
+                        <div class="mb-4">
+                            <label asp-for="Comment" class="form-label fw-semibold text-dark">Nhận xét</label>
+                            <textarea asp-for="Comment" class="form-control rounded-2" rows="5"
+                                      placeholder="Hãy chia sẻ chi tiết cảm nhận của bạn về sản phẩm (chất lượng, kiểu dáng, màu sắc, v.v.)..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-danger px-4 py-2 rounded-1 fw-medium">
+                                <i class="bi bi-send-fill me-2"></i>GỬI ĐÁNH GIÁ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <style>
+        :root {
+            --primary-color: #d2232a;
+            --secondary-color: #333;
+            --accent-color: #f5f5f5;
+            --border-color: #ddd;
+            --star-color: #ffc107;
+            --star-empty: #ddd;
+            --error-color: #d2232a;
+            --text-color: #333;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .card {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+
+        .card-body {
+            padding: 2rem 2.5rem;
+        }
+
+        .d-flex.mb-4.align-items-start {
+            gap: 1.5rem;
+        }
+
+        .flex-shrink-0 img {
+            border-radius: 8px;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(210, 35, 42, 0.2);
+        }
+
+        .flex-grow-1 h4 {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .flex-grow-1 p {
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .rating-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .rating-input .star {
+            font-size: 32px;
+            color: var(--star-empty);
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .rating-input .star:hover {
+            transform: scale(1.15);
+        }
+
+        .rating-input .star.active,
+        .rating-input .star.hover {
+            color: var(--star-color);
+        }
+
+        .d-flex.justify-content-between.w-75 {
+            width: 100% !important;
+            max-width: 420px;
+            margin-top: 0.25rem;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            font-size: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 6px !important;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        textarea.form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(210, 35, 42, 0.15);
+        }
+
+        .btn-danger {
+            font-size: 1rem;
+            padding: 12px 32px;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            box-shadow: 0 3px 8px rgba(210, 35, 42, 0.4);
+            background-color: var(--primary-color);
+            border: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: #b51d24;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        .text-danger {
+            color: var(--error-color) !important;
+        }
+
+        .border-bottom {
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        .border-top {
+            border-top: 1px solid var(--border-color) !important;
+        }
+
+        .fs-12 {
+            font-size: 12px !important;
+        }
+
+        .badge {
+            font-weight: 400;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 576px) {
+            .flex-shrink-0 img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .flex-grow-1 h4 {
+                font-size: 1.1rem;
+            }
+
+            .rating-input .star {
+                font-size: 26px;
+            }
+
+            .btn-danger {
+                width: 100%;
+                padding: 12px 0;
+            }
+        }
+    </style>
+}
+
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        $(document).ready(function () {
+            // Star rating interaction
+            $('.rating-input .star').on('click', function () {
+                const value = $(this).data('value');
+                $('#ratingValue').val(value);
+
+                $('.rating-input .star').removeClass('active');
+                $(this).prevAll('.star').addBack().addClass('active');
+            });
+
+            // Highlight stars when hovering
+            $('.rating-input .star').on('mouseenter', function () {
+                const hoverValue = $(this).data('value');
+                $('.rating-input .star').removeClass('hover');
+                $(this).prevAll('.star').addBack().addClass('hover');
+            });
+
+            $('.rating-input').on('mouseleave', function () {
+                $('.rating-input .star').removeClass('hover');
+                const currentValue = $('#ratingValue').val();
+                if (currentValue) {
+                    $('.rating-input .star').each(function () {
+                        if ($(this).data('value') <= currentValue) {
+                            $(this).addClass('active');
+                        }
+                    });
+                }
+            });
+
+            // Initialize if there's already a value
+            const initialValue = $('#ratingValue').val();
+            if (initialValue) {
+                $('.rating-input .star').each(function () {
+                    if ($(this).data('value') <= initialValue) {
+                        $(this).addClass('active');
+                    }
+                });
+            }
+
+            // Form validation
+            $('form').on('submit', function (e) {
+                if ($('#ratingValue').val() === '') {
+                    e.preventDefault();
+                    $('.rating-input').after('<div class="text-danger small mt-1">Vui lòng chọn đánh giá</div>');
+                }
+            });
+        });
+    </script>
+}

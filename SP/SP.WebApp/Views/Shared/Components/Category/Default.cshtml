@@ -1,0 +1,23 @@
+﻿@model IEnumerable<SP.Application.Dto.CategoryDto.CategoryViewDto>
+
+@foreach (var category in Model)
+{
+    var collapseId = "collapseSub" + category.Id;
+    <li class="category-item">
+        <a class="d-block text-dark" href="#" data-toggle="collapse" data-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+            @category.CategoryName
+        </a>
+
+        @if (category.SubCategories != null && category.SubCategories.Any())
+        {
+            <ul id="@collapseId" class="collapse ml-3 pl-2">
+                @foreach (var subCategory in category.SubCategories)
+                {
+                    <li class="subcategory-item">
+                        <a href="#">@subCategory.Name</a>
+                    </li>
+                }
+            </ul>
+        }
+    </li>
+}

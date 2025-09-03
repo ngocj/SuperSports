@@ -1,0 +1,778 @@
+﻿@model SP.Application.Dto.OrderDto.OrderCreateDto
+@{
+    ViewData["Title"] = "Thanh Toán Nhanh";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="supersport-container">
+    <div class="container checkout-body">
+        <div class="row">
+            <!-- Phần thông tin giao hàng -->
+            <div class="col-lg-7 col-md-6 shipping-info">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-truck"></i> Thông tin giao hàng</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Payment" method="post" id="checkout-form">
+                            <!-- Thông tin khách hàng -->
+                            <div class="form-group">
+                                <label asp-for="UserName">Họ và tên</label>
+                                <input required asp-for="UserName" class="form-control" placeholder="Nhập họ và tên" />
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">+84</span>
+                                    </div>
+                                    <input required asp-for="PhoneNumber" type="tel" class="form-control" placeholder="Nhập số điện thoại" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <!-- Địa chỉ: Province, District, Ward như cũ -->
+                            <div class="address-selection-section">
+                                <div class="form-row">
+                                    <!-- Province Selection -->
+                                    <div class="form-group col-md-4">
+                                        <div class="select-wrapper">
+                                            <label asp-for="ProvinceId">Tỉnh/Thành phố</label>
+                                            <div class="select-container">
+                                                <select required asp-for="ProvinceId" class="form-control select-address" id="provinceSelect" asp-items="ViewBag.Provinces">
+                                                    <option  value="">Chọn tỉnh/thành</option>
+                                                </select>
+                                            </div>
+                                            <span asp-validation-for="ProvinceId" class="text-danger validation-message" ></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- District Selection -->
+                                    <div class="form-group col-md-4">
+                                        <div class="select-wrapper">
+                                            <label asp-for="DistrictId">Quận/Huyện</label>
+                                            <div class="select-container">
+                                                <select required asp-for="DistrictId" class="form-control select-address" id="districtSelect" disabled>
+                                                    <option  value="">Chọn quận/huyện</option>
+                                                </select>
+                                            </div>
+                                            <span asp-validation-for="DistrictId" class="text-danger validation-message"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ward Selection -->
+                                    <div class="form-group col-md-4">
+                                        <div class="select-wrapper">
+                                            <label asp-for="WardId">Phường/Xã</label>
+                                            <div class="select-container">
+                                                <select required asp-for="WardId" class="form-control select-address" id="wardSelect" disabled>
+                                                    <option  value="">Chọn phường/xã</option>
+                                                </select>
+                                            </div>
+                                            <span asp-validation-for="WardId" class="text-danger validation-message"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="AddressDetail">Địa chỉ cụ thể</label>
+                                <textarea required asp-for="AddressDetail" class="form-control" rows="2" placeholder="Số nhà, tên đường..."></textarea>
+                                <span asp-validation-for="AddressDetail" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Note">Ghi chú đơn hàng (tuỳ chọn)</label>
+                                <textarea asp-for="Note" class="form-control" rows="2" placeholder="Ghi chú cho người bán..."></textarea>
+                            </div>
+
+                            <!-- Ẩn các trường hệ thống -->
+                            <input type="hidden" asp-for="EmployeeId" />
+                            <input type="hidden" asp-for="EmployeeName" />
+                            <input type="hidden" asp-for="TotalPrice" />
+                            <input type="hidden" name="productName" value="@Model.ProductName" />
+
+
+                            <!-- Ẩn ProductVariantId để gửi lên -->
+                            <input type="hidden" name="productVariantId" value="@Model.OrderDetails.First().ProductVariantId" />
+                            <input type="hidden" name="quantity" value="@Model.OrderDetails.First().Quantity" />
+
+        
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="payment-method mt-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-credit-card"></i> Phương thức thanh toán</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="payment-option active">
+                                <label>
+                                    <input type="radio" name="paymentMethod" value="COD" checked>
+                                    <div class="payment-method-info">
+                                        <img src="~/SbHome/img/anhthanhtoan/tienmat.png" alt="COD">
+                                        <span>Thanh toán khi nhận hàng (COD)</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <label>
+                                    <input type="radio" name="paymentMethod" value="VNPay">
+                                    <div class="payment-method-info">
+                                        <img src="~/SbHome/img/anhthanhtoan/vnpay.jpg" alt="VNPay">
+                                        <span>VNPay (Thẻ ATM, Visa/MasterCard)</span>
+                                    </div>
+                                </label>
+                            </div>              
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần tóm tắt đơn hàng -->
+            <div class="col-lg-5 col-md-6 order-summary">
+                <div class="card sticky-summary">
+                    <div class="card-header">
+                        <h4><i class="fas fa-shopping-bag"></i> Đơn hàng của bạn</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="product-list">
+                            @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                            {
+                                foreach (var item in Model.OrderDetails)
+                                {
+                                    string imageSrc = "";
+                                    string altText = "Không có ảnh";
+                                    string productName = Model.ProductName ?? item.ProductVariant?.ProductName ?? $"Sản phẩm {item.ProductVariantId}";
+
+                                    // Kiểm tra và lấy ảnh đầu tiên nếu có
+                                    if (item.ProductVariant?.Images != null && item.ProductVariant.Images.Any())
+                                    {
+                                        var firstImage = item.ProductVariant.Images.First();
+                                        if (firstImage?.FileData != null && !string.IsNullOrEmpty(firstImage.ContentType))
+                                        {
+                                            imageSrc = $"data:{firstImage.ContentType};base64,{Convert.ToBase64String(firstImage.FileData)}";
+                                        }
+                                    }
+
+                                    <div class="product-item">
+                                        <div class="product-image">
+                                            @if (!string.IsNullOrEmpty(imageSrc))
+                                            {
+                                                <img src="@imageSrc" alt="@productName" />
+                                            }
+                                            else
+                                            {
+                                                <div class="no-image-placeholder">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="product-info">
+                                            <div class="product-name">@productName</div>
+                                            <div class="product-variant">Phân loại: @item.ProductVariant?.Color - @item.ProductVariant?.Size</div>
+                                            <div class="product-price">@item.Price.ToString("N0") ₫</div>
+                                            <div class="product-quantity">Số lượng: @item.Quantity</div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-cart">Không có sản phẩm nào</div>
+                            }
+                        </div>
+
+                        <div class="order-total mt-3">
+                            <div class="total-row">
+                                <span>Tạm tính:</span>
+                                <span>@Model.TotalPrice.ToString("N0") ₫</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Phí vận chuyển:</span>
+                                <span>MIỄN PHÍ</span>
+                            </div>
+                            <div class="total-row grand-total">
+                                <span>Tổng cộng:</span>
+                                <span>@Model.TotalPrice.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-checkout" form="checkout-form">
+                            THANH TOÁN
+                        </button>
+
+                        <div class="policy-note">
+                            <p>Bằng cách đặt hàng, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của chúng tôi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"></script>
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+            .product-image img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 24px;
+        }
+
+        .address-selection-section {
+            margin-bottom: 20px;
+        }
+
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+            .select-wrapper label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: #333;
+                font-size: 14px;
+            }
+
+        .select-container {
+            position: relative;
+        }
+
+        .select-address {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 44px;
+            font-size: 14px;
+        }
+
+            .select-address:focus {
+                border-color: #d82e34;
+                box-shadow: 0 0 0 2px rgba(216, 46, 52, 0.1);
+                outline: none;
+            }
+
+            .select-address:disabled {
+                background-color: #f8f9fa;
+                cursor: not-allowed;
+                opacity: 0.8;
+            }
+
+        .select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .validation-message {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+
+        /* Loading state */
+        .select-address.loading {
+            background-image: none;
+            color: #999;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .select-address {
+                height: 42px;
+                padding: 8px 12px;
+            }
+        }
+
+
+        .supersport-container {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px 0;
+            min-height: calc(100vh - 150px);
+        }
+
+        .checkout-body {
+            padding-top: 20px;
+        }
+
+        .shipping-info .card, .order-summary .card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        /* CSS cho dropdown có thể cuộn */
+        .nice-select .list {
+            max-height: 300px; /* Giới hạn chiều cao tối đa */
+            overflow-y: auto; /* Thêm thanh cuộn dọc khi cần */
+            border-radius: 0 0 4px 4px;
+        }
+
+            /* Tùy chỉnh thanh cuộn */
+            .nice-select .list::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .nice-select .list::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+
+            .nice-select .list::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 4px;
+            }
+
+                .nice-select .list::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+            .card-header h4 {
+                margin: 0;
+                font-size: 18px;
+                color: #333;
+                font-weight: 600;
+            }
+
+            .card-header i {
+                margin-right: 10px;
+                color: #d82e34;
+            }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 4px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+        }
+
+        .payment-option {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s;
+        }
+
+            .payment-option:last-child {
+                border-bottom: none;
+            }
+
+            .payment-option.active {
+                background-color: #f8f9fa;
+            }
+
+            .payment-option:hover {
+                background-color: #f8f9fa;
+            }
+
+            .payment-option label {
+                display: flex;
+                align-items: center;
+                margin: 0;
+                cursor: pointer;
+                width: 100%;
+                padding: 0 10px;
+            }
+
+            .payment-option input {
+                margin-right: 10px;
+            }
+
+        .payment-method-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+            .payment-method-info img {
+                width: 40px;
+                height: 25px;
+                object-fit: contain;
+                margin-right: 15px;
+                border: 1px solid #eee;
+                border-radius: 4px;
+            }
+
+        .product-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+            .product-item:last-child {
+                border-bottom: none;
+            }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+            .product-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+
+        .product-info {
+            flex: 1;
+        }
+
+
+        .product-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .product-variant, .product-quantity {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .product-price {
+            font-weight: bold;
+            color: #d82e34;
+            margin-top: 5px;
+        }
+
+        .order-total {
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #d82e34;
+            margin-top: 10px;
+        }
+
+        #provinceSelect, #districtSelect, #wardSelect {
+            position: relative; /* hoặc absolute nếu cần */
+            z-index: 1050; /* số càng cao thì càng lên trên */
+        }
+
+
+
+
+        .btn-checkout {
+            width: 100%;
+            background-color: #d82e34;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-transform: uppercase;
+        }
+
+            .btn-checkout:hover {
+                background-color: #b8252a;
+            }
+
+        .policy-note {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+            .policy-note a {
+                color: #d82e34;
+                text-decoration: none;
+            }
+
+        .empty-cart {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .sticky-summary {
+            position: sticky;
+            top: 20px;
+        }
+
+
+
+        @@media (max-width: 991.98px) {
+            .shipping-info, .order-summary {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .order-summary {
+                margin-top: 30px;
+            }
+
+            .sticky-summary {
+                position: static;
+            }
+        }
+        /* Thêm vào file CSS của bạn */
+        select.form-control:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: #80bdff;
+                box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            }
+
+
+        @@media (max-width: 767.98px) {
+            .form-row .form-group {
+                margin-bottom: 15px;
+            }
+
+            .product-item {
+                flex-direction: column;
+            }
+
+            .product-image {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ($.fn.niceSelect) {
+                $('select').niceSelect();
+            }
+
+            // Khi chọn tỉnh
+            $(document).on('change', '#provinceSelect', function () {
+                var provinceId = $(this).val();
+                resetDropdown('#districtSelect', 'Chọn quận/huyện');
+                resetDropdown('#wardSelect', 'Chọn phường/xã');
+                if (provinceId) loadDistricts(provinceId);
+            });
+
+            // Khi chọn quận
+            $(document).on('change', '#districtSelect', function () {
+                var districtId = $(this).val();
+                resetDropdown('#wardSelect', 'Chọn phường/xã');
+                if (districtId) loadWards(districtId);
+            });
+
+            // Load quận theo tỉnh
+            function loadDistricts(provinceId, callback) {
+                $('#districtSelect').html('<option value="">Đang tải...</option>');
+                setDropdownState('#districtSelect', true);
+                $.get(`/Order/GetDistrictsByProvince?provinceId=${provinceId}`)
+                    .done(function (data) {
+                        updateDropdown('#districtSelect', data, 'Chọn quận/huyện');
+                        if (callback) callback();
+                    })
+                    .fail(function () {
+                        $('#districtSelect').html('<option value="">Lỗi khi tải dữ liệu</option>');
+                    });
+            }
+
+            // Load xã theo quận
+            function loadWards(districtId, callback) {
+                $('#wardSelect').html('<option value="">Đang tải...</option>');
+                setDropdownState('#wardSelect', true);
+                $.get(`/Order/GetWardsByDistrict?districtId=${districtId}`)
+                    .done(function (data) {
+                        updateDropdown('#wardSelect', data, 'Chọn phường/xã');
+                        if (callback) callback();
+                    })
+                    .fail(function () {
+                        $('#wardSelect').html('<option value="">Lỗi khi tải dữ liệu</option>');
+                    });
+            }
+
+            // Cập nhật dropdown
+            function updateDropdown(selector, data, defaultText) {
+                var $select = $(selector);
+                $select.empty().append(`<option value="">${defaultText}</option>`);
+                if (data && data.length > 0) {
+                    $.each(data, function (_, item) {
+                        $select.append($('<option></option>').val(item.id).text(item.name));
+                    });
+                    setDropdownState(selector, false);
+                    updateNiceSelect(selector, defaultText);
+                }
+            }
+
+            // Reset dropdown
+            function resetDropdown(selector, defaultText) {
+                $(selector).html(`<option value="">${defaultText}</option>`).prop('disabled', true);
+                updateNiceSelect(selector, defaultText);
+            }
+
+            // Enable/disable dropdown
+            function setDropdownState(selector, isDisabled) {
+                $(selector).prop('disabled', isDisabled);
+                $(selector).next('.nice-select').toggleClass('disabled', isDisabled);
+            }
+
+            // Update nice-select
+            function updateNiceSelect(selector, defaultText) {
+                var $niceSelect = $(selector).next('.nice-select');
+                if ($niceSelect.length) {
+                    $niceSelect.find('.current').text(defaultText);
+                    var $list = $niceSelect.find('.list').empty();
+                    $(selector).find('option').each(function () {
+                        if ($(this).val()) {
+                            $list.append($('<li></li>')
+                                .attr('data-value', $(this).val())
+                                .addClass('option')
+                                .text($(this).text()));
+                        }
+                    });
+                    $(selector).niceSelect('update');
+                }
+            }
+
+            // Nếu form đang ở chế độ edit thì load lại dropdown
+            var selectedProvinceId = '@Model.ProvinceId';
+            var selectedDistrictId = '@Model.DistrictId';
+            var selectedWardId = '@Model.WardId';
+
+            if (selectedProvinceId) {
+                loadDistricts(selectedProvinceId, function () {
+                    $('#districtSelect').val(selectedDistrictId).trigger('change');
+                    updateNiceSelect('#districtSelect', 'Chọn quận/huyện');
+
+                    if (selectedDistrictId) {
+                        loadWards(selectedDistrictId, function () {
+                            $('#wardSelect').val(selectedWardId);
+                            updateNiceSelect('#wardSelect', 'Chọn phường/xã');
+                        });
+                    }
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            // Xử lý khi form submit
+            $('#checkout-form').submit(function (e) {
+                e.preventDefault();
+
+                // Lấy phương thức thanh toán được chọn
+                var paymentMethod = $('input[name="paymentMethod"]:checked').val();
+
+                // Thêm phương thức thanh toán vào form data
+                var form = $(this);
+                var url = form.attr('action');
+
+                // Thêm tham số paymentMethod vào URL
+                url += url.indexOf('?') === -1 ? '?' : '&';
+                url += 'paymentMethod=' + paymentMethod;
+
+                // Submit form với URL đã cập nhật
+                form.attr('action', url);
+                form.unbind('submit').submit();
+            });
+
+            // Xử lý khi thay đổi phương thức thanh toán
+            $('input[name="paymentMethod"]').change(function () {
+                $('.payment-option').removeClass('active');
+                $(this).closest('.payment-option').addClass('active');
+            });
+        });
+    </script>
+
+}

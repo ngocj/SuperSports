@@ -1,0 +1,67 @@
+﻿@model SP.Application.Dto.DiscountDto.DiscountCreateDto
+
+@{
+    ViewData["Title"] = "Tạo Khuyến Mãi";
+    Layout = "~/Views/Shared/_LayoutManager.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tạo Mã Giảm Giá Mới</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateDiscount" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="control-label">Tên mã giảm giá</label>
+                            <textarea asp-for="Name" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="control-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Percent" class="control-label">Phần trăm giảm (%)</label>
+                            <input asp-for="Percent" class="form-control" type="number" min="0" max="100" step="10" />
+                            <span asp-validation-for="Percent" class="text-danger"></span>
+                        </div>
+                      
+                        <div class="form-check mb-3">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label">Đang kích hoạt</label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DateStart" class="control-label">Ngày bắt đầu</label>
+                            <input asp-for="DateStart" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="DateStart" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DateEnd" class="control-label">Ngày kết thúc</label>
+                            <input asp-for="DateEnd" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="DateEnd" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="GetAllDiscount" asp-controller="Manager" class="btn btn-secondary me-2">Quay lại</a>
+                            <button type="submit" class="btn btn-primary mx-2">Tạo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

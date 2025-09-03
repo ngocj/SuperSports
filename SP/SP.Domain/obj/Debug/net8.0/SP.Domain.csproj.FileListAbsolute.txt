@@ -1,0 +1,14 @@
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\bin\Debug\net8.0\SP.Domain.deps.json
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\bin\Debug\net8.0\SP.Domain.runtimeconfig.json
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\bin\Debug\net8.0\SP.Domain.dll
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\bin\Debug\net8.0\SP.Domain.pdb
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.csproj.AssemblyReference.cache
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.AssemblyInfoInputs.cache
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.AssemblyInfo.cs
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.csproj.CoreCompileInputs.cache
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.dll
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\refint\SP.Domain.dll
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.pdb
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\SP.Domain.genruntimeconfig.cache
+D:\BÀI TẬP\DATN_K16\NguyenBaoNgoc_2021602053_DATN\SP\SP.Domain\obj\Debug\net8.0\ref\SP.Domain.dll

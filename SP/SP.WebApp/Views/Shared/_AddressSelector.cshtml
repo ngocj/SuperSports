@@ -1,0 +1,90 @@
+@model dynamic
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="form-group">
+            <label for="province">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+            <select id="province" name="ProvinceId" class="form-control" required>
+                <option value="">Chọn Tỉnh/Thành phố</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="form-group">
+            <label for="district">Quận/Huyện <span class="text-danger">*</span></label>
+            <select id="district" name="DistrictId" class="form-control" required disabled>
+                <option value="">Chọn Quận/Huyện</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="form-group">
+            <label for="ward">Phường/Xã <span class="text-danger">*</span></label>
+            <select id="ward" name="WardId" class="form-control" required disabled>
+                <option value="">Chọn Phường/Xã</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="form-group mt-3">
+    <label for="address">Địa chỉ cụ thể <span class="text-danger">*</span></label>
+    <input type="text" id="address" name="Address" class="form-control" placeholder="Số nhà, tên đường..." required>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load tỉnh/thành phố
+            $.get('/Address/GetProvinces', function (data) {
+                const provinces = JSON.parse(data);
+                const provinceSelect = $('#province');
+                provinces.forEach(function (province) {
+                    provinceSelect.append(new Option(province.name, province.code));
+                });
+            });
+
+            // Xử lý khi chọn tỉnh/thành phố
+            $('#province').change(function () {
+                const provinceId = $(this).val();
+                const districtSelect = $('#district');
+                const wardSelect = $('#ward');
+
+                // Reset quận/huyện và phường/xã
+                districtSelect.html('<option value="">Chọn Quận/Huyện</option>').prop('disabled', true);
+                wardSelect.html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+
+                if (provinceId) {
+                    // Load quận/huyện
+                    $.get('/Address/GetDistricts/' + provinceId, function (data) {
+                        const districts = JSON.parse(data).districts;
+                        districts.forEach(function (district) {
+                            districtSelect.append(new Option(district.name, district.code));
+                        });
+                        districtSelect.prop('disabled', false);
+                    });
+                }
+            });
+
+            // Xử lý khi chọn quận/huyện
+            $('#district').change(function () {
+                const districtId = $(this).val();
+                const wardSelect = $('#ward');
+
+                // Reset phường/xã
+                wardSelect.html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+
+                if (districtId) {
+                    // Load phường/xã
+                    $.get('/Address/GetWards/' + districtId, function (data) {
+                        const wards = JSON.parse(data).wards;
+                        wards.forEach(function (ward) {
+                            wardSelect.append(new Option(ward.name, ward.code));
+                        });
+                        wardSelect.prop('disabled', false);
+                    });
+                }
+            });
+        });
+    </script>
+} 

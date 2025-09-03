@@ -1,0 +1,606 @@
+﻿@model IEnumerable<SP.Application.Dto.CartDto.CartViewDto>
+@{
+    ViewData["Title"] = "GetAllCartByUserId";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    decimal totalAmount = Model.Sum(item => item.ProductVariant.Price * item.Quantity);
+
+    var colorMap = new Dictionary<string, string>
+    {
+        { "Red", "Đỏ" },
+        { "Blue", "Xanh dương" },
+        { "Green", "Xanh lá" },
+        { "Black", "Đen" },
+        { "White", "Trắng" },
+        { "Yellow", "Vàng" },
+        { "Gray", "Xám" },
+        { "Pink", "Hồng" },
+        { "Purple", "Tím" },
+        { "Orange", "Cam" },
+        { "Brown", "Nâu" },
+        { "Beige", "Be" },
+        { "Cyan", "Xanh lam" },
+        { "Magenta", "Hồng đậm" },
+        { "Navy", "Xanh navy" }
+    };
+}
+
+<div class="cart-container">
+    <div class="container">
+        <div class="cart-header">
+            <h1><i class="fas fa-shopping-cart"></i> GIỎ HÀNG CỦA BẠN</h1>
+           
+        </div>
+
+        <form id="checkoutForm" asp-controller="Order" asp-action="CartCheckout1" method="post">
+            <div class="row">
+                <div class="col-lg-8 col-md-12">
+                    <div class="cart-items">
+                        @if (Model.Any())
+                        {
+                            <table class="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="selectAllCheckbox" />
+                                        </th>
+                                        <th class="product-col">Sản phẩm</th>
+                                        <th class="price-col">Đơn giá</th>
+                                        <th class="quantity-col">Số lượng</th>
+                                        <th class="total-col">Thành tiền</th>
+                                        <th class="action-col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="cart-item">
+                                            <td>
+                                                <input type="checkbox" name="SelectedItems" value= @item.ProductVariantId />
+                                            </td>
+                                            <td class="product-col">
+                                                <div class="product-info">
+                                                    <div class="product-image">
+                                                        @if (item.ProductVariant != null && item.ProductVariant.Images?.Any() == true)
+                                                        {
+                                                            var variant = item.ProductVariant;
+                                                            var imageFile = variant.Images.FirstOrDefault();
+                                                            var imageSrc = imageFile?.FileData != null
+                                                            ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                                            : "";
+                                                            var altText = imageFile?.FileData != null ? variant.ProductName : "Không có ảnh";
+
+                                                            <a asp-controller="Home" asp-action="Detail" asp-route-id="@item.ProductVariant.ProductId">
+                                                                <img src="@imageSrc" alt="@altText" />
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="no-image">Không có ảnh</div>
+                                                        }
+                                                    </div>
+                                                    <div class="product-details">
+                                                        <h4 class="product-name">@item.ProductVariant.ProductName</h4>
+                                                        <div class="product-variant">
+                                                            <span>Size: @item.ProductVariant.Size</span>
+                                                            <span>Màu: @(colorMap.TryGetValue(item.ProductVariant.Color, out var colorName) ? colorName : item.ProductVariant.Color)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="price-col">@(item.ProductVariant.Price.ToString("N0"))₫</td>
+                                            <td class="quantity-col">
+                                                <div class="quantity-control">
+                                                    <button type="button" class="qty-btn minus" data-id="@item.ProductVariantId" @(item.Quantity <= 1 ? "disabled" : "")>-</button>
+                                                    <input type="number"
+                                                           name="CartItems[@Model.ToList().IndexOf(item)].Quantity"
+                                                           value="@item.Quantity"
+                                                           min="1"
+                                                           max="@item.ProductVariant.Quantity"
+                                                           class="qty-input"
+                                                           data-max="@item.ProductVariant.Quantity"
+                                                           onchange="validateQuantity(this)">
+                                                    <input type="hidden" name="CartItems[@Model.ToList().IndexOf(item)].ProductVariantId" value="@item.ProductVariantId" />
+                                                    <button type="button" class="qty-btn plus" data-id="@item.ProductVariantId" @(item.Quantity >= item.ProductVariant.Quantity ? "disabled" : "")>+</button>
+                                   
+                                                </div>
+                                            </td>
+                                            <td class="total-col">@((item.ProductVariant.Price * item.Quantity).ToString("N0"))₫</td>
+                                            <td class="action-col">
+                                                <a href="/Cart/Delete/@item.ProductVariantId" class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?');">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="empty-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h3>Giỏ hàng của bạn đang trống</h3>
+                                <p>Hãy khám phá các sản phẩm mới và thêm vào giỏ hàng!</p>
+                                <a href="@Url.Action("Collections","Home",new { categoryId = 1})" class="btn-continue">TIẾP TỤC MUA SẮM</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="col-lg-4 col-md-12">
+                        <div class="cart-summary">
+                            <div class="summary-header">
+                                <h3>THÔNG TIN ĐƠN HÀNG</h3>
+                            </div>
+                            <div class="summary-body">
+                                <div class="summary-row">
+                                    <span>Tạm tính</span>
+                                    <span>@totalAmount.ToString("N0")₫</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Phí vận chuyển</span>
+                                    <span>Miễn phí</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Tổng cộng</span>
+                                    <span>@totalAmount.ToString("N0")₫</span>
+                                </div>
+                            </div>
+                            <div class="summary-footer">
+                                <button type="submit" class="btn-checkout">TIẾN HÀNH THANH TOÁN</button>
+                                <a href="@Url.Action("Collections","Home",new { categoryId = 1})" class="btn-continue">TIẾP TỤC MUA SẮM</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Main Container */
+        .cart-container {
+            padding: 30px 0 60px;
+            background-color: #f8f8f8;
+        }
+
+        /* Header */
+        .cart-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+            .cart-header h1 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+            }
+
+                .cart-header h1 i {
+                    margin-right: 10px;
+                    color: #ff6b6b;
+                }
+
+        /* Steps */
+        .cart-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+
+            .step:not(:last-child):after {
+                content: '';
+                position: absolute;
+                top: 15px;
+                left: 60%;
+                width: 80%;
+                height: 2px;
+                background: #ddd;
+                z-index: 1;
+            }
+
+            .step span {
+                display: inline-block;
+                width: 30px;
+                height: 30px;
+                line-height: 30px;
+                border-radius: 50%;
+                background: #ddd;
+                color: #fff;
+                font-weight: bold;
+                margin-bottom: 5px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .step p {
+                font-size: 12px;
+                color: #999;
+            }
+
+            .step.active span {
+                background: #ff6b6b;
+            }
+
+            .step.active p {
+                color: #333;
+                font-weight: 500;
+            }
+
+        /* Cart Items */
+        .cart-items {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .cart-table th {
+                padding: 15px;
+                background: #f5f5f5;
+                font-weight: 600;
+                text-align: left;
+                color: #333;
+                border-bottom: 1px solid #e1e1e1;
+            }
+
+            .cart-table td {
+                padding: 15px;
+                vertical-align: middle;
+                border-bottom: 1px solid #e1e1e1;
+            }
+
+        /* Product Column */
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+            border: 1px solid #eee;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .product-image img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+        .no-image {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .product-variant {
+            font-size: 12px;
+            color: #777;
+        }
+
+            .product-variant span {
+                display: block;
+                margin-bottom: 2px;
+            }
+
+        /* Quantity Control */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .qty-btn:hover {
+                background: #eee;
+            }
+
+        .qty-input {
+            width: 50px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-left: none;
+            border-right: none;
+            font-size: 14px;
+            -moz-appearance: textfield;
+        }
+
+            .qty-input::-webkit-outer-spin-button,
+            .qty-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+        /* Remove Button */
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+            .remove-btn:hover {
+                color: #ff6b6b;
+            }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+            .empty-cart i {
+                font-size: 50px;
+                color: #ddd;
+                margin-bottom: 20px;
+            }
+
+            .empty-cart h3 {
+                font-size: 18px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .empty-cart p {
+                color: #777;
+                margin-bottom: 20px;
+            }
+
+        /* Cart Summary */
+        .cart-summary {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .summary-header {
+            padding: 15px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+            .summary-header h3 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+                margin: 0;
+            }
+
+        .summary-body {
+            padding: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+            .summary-row.total {
+                font-weight: 600;
+                font-size: 16px;
+                color: #ff6b6b;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid #e1e1e1;
+            }
+
+        .summary-footer {
+            padding: 15px;
+            border-top: 1px solid #e1e1e1;
+        }
+
+        /* Buttons */
+        .btn-checkout {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #ff6b6b;
+            color: #fff;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+            .btn-checkout:hover {
+                background: #ff5252;
+                color: #fff;
+            }
+
+        .btn-continue {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+            .btn-continue:hover {
+                background: #f5f5f5;
+                color: #333;
+            }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Lấy thông tin tồn kho từ server
+            const inventoryData = {};
+        @foreach (var item in Model)
+        {
+            @:inventoryData['@item.ProductVariantId'] = @item.ProductVariant.Quantity;
+        }
+
+                // Quantity controls
+                $('.qty-btn').click(function () {
+                    var input = $(this).siblings('.qty-input');
+                    var productVariantId = $(this).data('id');
+                    var currentVal = parseInt(input.val());
+                    var isPlus = $(this).hasClass('plus');
+                    var maxQuantity = inventoryData[productVariantId]; // Chỉ sử dụng số lượng tồn kho
+
+                    var newVal = isPlus ? currentVal + 1 : Math.max(currentVal - 1, 1);
+
+                    // Kiểm tra số lượng không vượt quá tồn kho
+                    if (newVal > maxQuantity) {
+                        alert(`Số lượng tối đa cho sản phẩm này là ${maxQuantity} (theo tồn kho)`);
+                        newVal = maxQuantity;
+                    }
+
+                    if (newVal !== currentVal) {
+                        input.val(newVal);
+                        updateCartItem(productVariantId, newVal);
+                    }
+                });
+
+            // Xử lý khi nhập số lượng trực tiếp
+            $('.qty-input').on('change', function () {
+                var productVariantId = $(this).siblings('.qty-btn').data('id');
+                var newVal = parseInt($(this).val()) || 1;
+                var maxQuantity = inventoryData[productVariantId];
+
+                if (newVal > maxQuantity) {
+                    alert(`Số lượng tối đa cho sản phẩm này là ${maxQuantity} (theo tồn kho)`);
+                    newVal = maxQuantity;
+                    $(this).val(newVal);
+                }
+
+                if (newVal < 1) {
+                    newVal = 1;
+                    $(this).val(newVal);
+                }
+
+                updateCartItem(productVariantId, newVal);
+            });
+        });
+
+        function updateCartItem(productVariantId, quantity) {
+            const token = sessionStorage.getItem("JwtToken");
+            $.ajax({
+                url: '/Cart/Edit',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    ProductVariantId: productVariantId,
+                    Quantity: quantity
+                }),
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (xhr) {
+                    alert('Có lỗi khi cập nhật giỏ hàng: ' + (xhr.responseJSON?.message || ''));
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const itemCheckboxes = document.querySelectorAll('input[name="SelectedItems"]');
+
+            selectAllCheckbox.addEventListener('change', function () {
+                const isChecked = this.checked;
+                itemCheckboxes.forEach(cb => cb.checked = isChecked);
+            });
+
+            itemCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function () {
+                    if (!this.checked) {
+                        selectAllCheckbox.checked = false;
+                    } else {
+                        const allChecked = Array.from(itemCheckboxes).every(c => c.checked);
+                        selectAllCheckbox.checked = allChecked;
+                    }
+                });
+            });
+
+            // Kiểm tra và cập nhật trạng thái nút +/- khi tải trang
+            $('.qty-input').each(function () {
+                var productVariantId = $(this).siblings('.qty-btn').data('id');
+                var currentVal = parseInt($(this).val());
+                var maxQuantity = inventoryData[productVariantId];
+
+                // Disable nút + nếu đạt tối đa tồn kho
+                $(this).siblings('.plus').prop('disabled', currentVal >= maxQuantity);
+
+                // Disable nút - nếu chỉ còn 1
+                $(this).siblings('.minus').prop('disabled', currentVal <= 1);
+            });
+        });
+    </script>
+}

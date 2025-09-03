@@ -1,0 +1,344 @@
+﻿@model IEnumerable<SP.Application.Dto.ProductVariantDto.VariantViewDto>
+@{
+    ViewData["Title"] = "Thư viện hình ảnh sản phẩm";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    string previousProductName = null;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-primary"><i class="fas fa-images me-2"></i>Thư viện hình ảnh sản phẩm</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a  asp-action="Index" asp-controller="Admin">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Thư viện hình ảnh</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0 text-dark">Danh sách hình ảnh theo sản phẩm</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row product-container">
+                        @{
+                            var groupedProducts = Model.GroupBy(p => p.ProductName);
+                        }
+
+                        @foreach (var group in groupedProducts)
+                        {
+                            <div class="col-12 mb-4 product-card" data-product="@group.Key.ToLower()">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0 product-name">@group.Key</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @foreach (var variant in group)
+                                        {
+                                            <div class="color-section mb-3">
+                                                <div class="color-badge">
+                                                    <span class="badge mb-2">@TranslateColorToVietnamese(variant.Color)</span>
+                                                    <span class="badge bg-light text-dark">@variant.Size</span>
+                                                </div>
+                                                <div class="image-gallery">
+                                                    @if (variant.Images != null && variant.Images.Any())
+                                                    {
+                                                        <div class="d-flex flex-wrap image-container">
+                                                            @foreach (var imageFile in variant.Images)
+                                                            {
+                                                                var imageSrc = imageFile.FileData != null
+                                                                ? $"data:{imageFile.ContentType};base64,{Convert.ToBase64String(imageFile.FileData)}"
+                                                                : "";
+                                                                var altText = !string.IsNullOrEmpty(imageSrc) ? variant.ProductName : "Không có ảnh";
+
+                                                                <div class="image-card">
+                                                                    <div class="image-wrapper position-relative">
+                                                                        @if (!string.IsNullOrEmpty(imageSrc))
+                                                                        {
+                                                                            <img src="@imageSrc"
+                                                                                 alt="@altText"
+                                                                                 class="product-image img-fluid"
+                                                                                 data-bs-toggle="modal"
+                                                                                 data-bs-target="#imageModal"
+                                                                                 data-img-src="@imageSrc"
+                                                                                 data-img-title="@variant.ProductName - @variant.Color" />
+
+                                                                            <!-- Nút xóa ảnh -->
+                                                                            <form method="post"
+                                                                                  asp-action="DeleteImage"
+                                                                                  asp-controller="Image"
+                                                                                  asp-route-id="@imageFile.Id"
+                                                                                  class="delete-form position-absolute top-0 end-0 m-1">
+                                                                                <button type="submit"
+                                                                                        class="btn btn-sm btn-danger"
+                                                                                        onclick="return confirm('Bạn có chắc muốn xóa ảnh này?')">
+                                                                                    <i class="fas fa-trash-alt"></i>
+                                                                                </button>
+                                                                            </form>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="no-image">
+                                                                                <i class="fas fa-image"></i>
+                                                                                <span>Không có ảnh</span>
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="no-image-container">
+                                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                                            <span>Không có ảnh cho màu sắc này</span>
+                                                        </div>
+                                                    }
+
+                                                    <!-- Form thêm ảnh -->
+                                                    <div class="mt-3">
+                                                        <form asp-action="UploadImage"
+                                                              asp-controller="Image"
+                                                              method="post"
+                                                              enctype="multipart/form-data"
+                                                              class="upload-form d-flex align-items-center gap-2 mt-2">
+                                                            <input type="hidden" name="productVariantId" value="@variant.Id" />
+
+                                                            <label class="btn btn-outline-secondary btn-sm mb-0">
+                                                                <i class="fas fa-image me-1"></i> Chọn ảnh
+                                                                <input type="file" name="file" class="d-none preview-input" accept="image/*" required>
+                                                            </label>
+
+                                                            <img src="" class="img-preview ms-2 d-none" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+
+                                                            <button type="submit" class="btn btn-sm btn-success ml-1">
+                                                                <i class="fas fa-upload me-1"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Ảnh sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Ảnh sản phẩm" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ẩn nút xóa mặc định */
+    .delete-form {
+        display: none;
+    }
+
+    /* Khi hover vào ảnh, hiện nút xóa */
+    .image-wrapper:hover .delete-form {
+        display: block;
+    }
+
+    .product-container {
+        margin-bottom: 1rem;
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .color-section {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 1rem;
+    }
+
+        .color-section:last-child {
+            border-bottom: none;
+        }
+
+    .image-container {
+        gap: 10px;
+    }
+
+    .image-card {
+        width: 120px;
+        margin-bottom: 10px;
+    }
+
+    .image-wrapper {
+        position: relative;
+        height: 120px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+    }
+
+        .image-wrapper:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+    .product-image {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+    }
+
+    .no-image, .no-image-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        height: 100%;
+        padding: 1rem;
+        text-align: center;
+    }
+
+        .no-image i, .no-image-container i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+    .product-name {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .color-badge .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    #searchInput {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Modal styling */
+    #modalImage {
+        max-height: 70vh;
+    }
+
+    .upload-form label {
+        cursor: pointer;
+    }
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Image modal functionality
+        document.querySelectorAll('.product-image').forEach(function (image) {
+            image.addEventListener('click', function () {
+                document.getElementById('modalImage').src = this.getAttribute('data-img-src');
+                document.getElementById('imageModalLabel').textContent = this.getAttribute('data-img-title');
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            document.querySelectorAll('.product-card').forEach(function (card) {
+                const productName = card.getAttribute('data-product');
+                if (productName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+    // Preview selected image before upload
+    document.querySelectorAll('.upload-form').forEach(form => {
+        const fileInput = form.querySelector('.preview-input');
+        const previewImg = form.querySelector('.img-preview');
+
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImg.src = "";
+                previewImg.classList.add('d-none');
+            }
+        });
+    });
+
+</script>
+@functions {
+    // Hàm chuyển tên màu tiếng Anh sang tiếng Việt
+    public string TranslateColorToVietnamese(string color)
+    {
+        var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "red", "Đỏ" },
+            { "blue", "Xanh dương" },
+            { "green", "Xanh lá" },
+            { "yellow", "Vàng" },
+            { "black", "Đen" },
+            { "white", "Trắng" },
+            { "orange", "Cam" },
+            { "purple", "Tím" },
+            { "pink", "Hồng" },
+            { "gray", "Xám" },
+            { "brown", "Nâu" },
+            // Thêm các màu khác nếu cần
+        };
+
+        return dict.TryGetValue(color.Trim(), out var vnColor) ? vnColor : color;
+    }
+}
