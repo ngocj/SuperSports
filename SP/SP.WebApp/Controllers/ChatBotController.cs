@@ -58,7 +58,7 @@ namespace SP.WebApp.Controllers
     public class ChatbotGeminiService : IChatbotGeminiService
     {
         private readonly HttpClient _httpClient;
-        private const string _apiKey = "AIzaSyAr3O1EViTQIAUDG-szlEClO1SFokGG_r8"; // TODO: Move to appsettings
+        private const string _apiKey = ""; // TODO: Move to appsettings //AIzaSyAr3O1EViTQIAUDG-szlEClO1SFokGG_r8
         private const string GeminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
         private const string ApiUrl = "https://localhost:7131/api/product";
         private const string ApiUrl1 = "https://localhost:7131/api/productVariant";
